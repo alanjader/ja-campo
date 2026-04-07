@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1a3a1a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="JA Campo" />
+  <link rel="manifest" href="manifest.json" />
+  <title>JA Agro · Campo</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0f1f0f;
+      --surface:   #162416;
+      --card:      #1e321e;
+      --border:    #2d4a2d;
+      --accent:    #5dba47;
+      --accent2:   #a3e635;
+      --text:      #e8f5e8;
+      --muted:     #7a9e7a;
+      --danger:    #ff6b6b;
+      --warn:      #f5a623;
+      --mono:      'DM Mono', monospace;
+      --sans:      'Syne', sans-serif;
+      --r:         12px;
+      --safe-bottom: env(safe-area-inset-bottom, 16px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,31,15,.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      padding-top: calc(14px + env(safe-area-inset-top, 0px));
+    }
+    .topbar-logo { font-size: 18px; font-weight: 800; letter-spacing: -.5px; }
+    .topbar-logo span { color: var(--accent); }
+    .sync-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 11px;
+      padding: 4px 10px; border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: all .3s;
+    }
+    .sync-badge.online  { border-color: var(--accent); color: var(--accent); }
+    .sync-badge.offline { border-color: var(--warn);   color: var(--warn);   }
+    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .sync-badge.online .sync-dot { animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: 4px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex-shrink: 0;
+      padding: 7px 16px; border-radius: 20px;
+      font-size: 13px; font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer; transition: all .2s;
+      background: transparent; color: var(--muted);
+    }
+    .tab.active {
+      background: var(--accent); color: #0f1f0f;
+      border-color: var(--accent);
+    }
+
+    /* ── MAIN ── */
+    main { padding: 16px 20px; padding-bottom: calc(90px + var(--safe-bottom)); }
+
+    /* ── FORM ── */
+    .form-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .form-header h2 { font-size: 20px; font-weight: 700; }
+    .badge-count {
+      background: var(--accent); color: #0f1f0f;
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      padding: 2px 8px; border-radius: 10px;
+    }
+
+    .form-section { margin-bottom: 24px; }
+    .form-section-title {
+      font-family: var(--mono); font-size: 10px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--muted); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .form-section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .form-grid { display: grid; gap: 12px; }
+    .form-grid.cols2 { grid-template-columns: 1fr 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .8px;
+    }
+    .field label .req { color: var(--accent); margin-left: 2px; }
+
+    .field input,
+    .field select,
+    .field textarea {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-family: var(--sans); font-size: 15px;
+      padding: 12px 14px; border-radius: var(--r);
+      outline: none; width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(93,186,71,.15);
+    }
+    .field input.error, .field select.error { border-color: var(--danger); }
+    .field textarea { resize: none; min-height: 80px; }
+    .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='%237a9e7a' d='M7 7l3 3 3-3'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 20px; padding-right: 40px; }
+    .field-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .field-error { font-size: 11px; color: var(--danger); margin-top: 2px; }
+
+    .qty-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .qty-calculated {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .qty-calculated .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+    .qty-calculated .value { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--accent2); }
+
+    /* ── DOSE ALERT ── */
+    .dose-alert {
+      padding: 10px 14px; border-radius: 8px; font-size: 12px;
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 6px; display: none;
+    }
+    .dose-alert.ok   { background: rgba(93,186,71,.12); border: 1px solid rgba(93,186,71,.3); color: var(--accent); }
+    .dose-alert.warn { background: rgba(245,166,35,.12); border: 1px solid rgba(245,166,35,.3); color: var(--warn); }
+    .dose-alert.show { display: flex; }
+
+    /* ── BTN ── */
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 15px 24px; border-radius: var(--r);
+      font-family: var(--sans); font-size: 15px; font-weight: 700;
+      border: none; cursor: pointer; width: 100%;
+      transition: all .2s; letter-spacing: .3px;
+    }
+    .btn-primary {
+      background: var(--accent); color: #0f1f0f;
+    }
+    .btn-primary:active { transform: scale(.97); background: var(--accent2); }
+    .btn-secondary {
+      background: var(--card); color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-secondary:active { transform: scale(.97); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── PENDING LIST ── */
+    .pending-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .pending-header h2 { font-size: 20px; font-weight: 700; }
+    .pending-empty {
+      text-align: center; padding: 60px 20px;
+      color: var(--muted); font-size: 14px;
+    }
+    .pending-empty .icon { font-size: 48px; margin-bottom: 12px; opacity: .4; }
+
+    .record-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px 16px; margin-bottom: 10px;
+      position: relative; overflow: hidden;
+      animation: slideIn .25s ease;
+    }
+    @keyframes slideIn { from { opacity:0; transform: translateY(8px); } }
+    .record-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--accent);
+    }
+    .record-card.synced::before { background: var(--muted); }
+    .record-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .record-title { font-weight: 700; font-size: 14px; }
+    .record-date { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+    .record-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      font-family: var(--mono); font-size: 11px;
+      padding: 3px 8px; border-radius: 6px;
+      background: var(--surface); color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .chip.accent { background: rgba(93,186,71,.12); color: var(--accent); border-color: rgba(93,186,71,.3); }
+    .record-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-sm {
+      padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      border: none; cursor: pointer; font-family: var(--sans); transition: all .15s;
+    }
+    .btn-del { background: rgba(255,107,107,.15); color: var(--danger); border: 1px solid rgba(255,107,107,.3); }
+    .btn-del:active { transform: scale(.95); }
+
+    /* ── SYNC PANEL ── */
+    .sync-panel {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: var(--r); padding: 20px; margin-bottom: 16px;
+    }
+    .sync-title { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+    .sync-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+    .sync-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+    .stat-box {
+      background: var(--surface); border-radius: 8px; padding: 12px 10px; text-align: center;
+    }
+    .stat-box .n { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--accent); }
+    .stat-box .l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+
+    /* ── EXPORT ── */
+    .export-section { margin-top: 20px; }
+    .export-section h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; color: var(--muted); }
+    .export-btns { display: flex; flex-direction: column; gap: 8px; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); padding: 12px 20px; border-radius: 10px;
+      font-size: 14px; font-weight: 600;
+      opacity: 0; transition: all .3s; z-index: 999; white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    #toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: var(--accent); color: var(--accent); }
+    #toast.error   { border-color: var(--danger); color: var(--danger); }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      display: flex;
+      background: rgba(15,31,15,.95);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      padding-bottom: var(--safe-bottom);
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      padding: 10px 0; gap: 3px; cursor: pointer;
+      color: var(--muted); transition: color .2s; border: none; background: none;
+      font-family: var(--sans);
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-icon { font-size: 22px; line-height: 1; }
+    .nav-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; }
+    .nav-pip {
+      position: absolute; top: 6px; right: calc(50% - 14px);
+      background: var(--danger); width: 8px; height: 8px;
+      border-radius: 50%; display: none;
+    }
+    .nav-item { position: relative; }
+    .nav-item.has-pip .nav-pip { display: block; }
+
+    /* ── LOADING ── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.2);
+      border-top-color: #0f1f0f;
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── CONFIG ── */
+    .config-section { margin-bottom: 24px; }
+    .config-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+    .config-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; background: var(--card); border-radius: 10px;
+      margin-bottom: 8px; border: 1px solid var(--border);
+    }
+    .config-row-label { font-size: 14px; }
+    .config-row-val { font-family: var(--mono); font-size: 12px; color: var(--muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .version-tag { text-align: center; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 20px; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">JA <span>Campo</span></div>
+  <div class="sync-badge offline" id="syncBadge">
+    <div class="sync-dot"></div>
+    <span id="syncText">Offline</span>
+  </div>
+</div>
+
+<!-- TABS (visible only in registro page) -->
+<div class="tabs" id="tabBar" style="display:none">
+  <div class="tab active" onclick="setTab('novo')">＋ Nova Mov.</div>
+  <div class="tab" onclick="setTab('lista')">📋 Pendentes <span id="tabCount"></span></div>
+</div>
+
+<!-- ═══════════ PAGE: REGISTRO ═══════════ -->
+<div class="page active" id="page-registro">
+
+  <!-- TAB: NOVO -->
+  <div id="tab-novo">
+    <main>
+      <div class="form-header">
+        <h2>Movimentação de Campo</h2>
+      </div>
+
+      <!-- IDENTIFICAÇÃO -->
+      <div class="form-section">
+        <div class="form-section-title">Identificação</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Data <span class="req">*</span></label>
+            <input type="date" id="f-data" />
+          </div>
+          <div class="field">
+            <label>Safra <span class="req">*</span></label>
+            <select id="f-safra">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Talhão <span class="req">*</span></label>
+            <select id="f-talhao">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Atividade <span class="req">*</span></label>
+            <select id="f-atividade" onchange="onAtividadeChange()">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- INSUMO -->
+      <div class="form-section">
+        <div class="form-section-title">Insumo / Produto</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Item</label>
+            <select id="f-item" onchange="onItemChange()">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Produto Comercial</label>
+            <select id="f-produto">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tipo Aplicação</label>
+            <select id="f-aplicacao">
+              <option value="">— selecione —</option>
+              <option>SOLO</option>
+              <option>FOLIAR</option>
+              <option>SEMENTE</option>
+              <option>DRENCH</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUANTIDADE -->
+      <div class="form-section">
+        <div class="form-section-title">Quantidade</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Qtde / ha <span class="req">*</span></label>
+            <input type="number" id="f-qtdeha" placeholder="0,00" step="0.01" oninput="calcTotal()" />
+            <div class="dose-alert" id="doseAlert"></div>
+          </div>
+          <div class="field">
+            <label>Área aplicada (ha)</label>
+            <input type="number" id="f-area" placeholder="auto" step="0.01" oninput="calcTotal()" />
+            <div class="field-hint">Deixe vazio para usar área do talhão</div>
+          </div>
+        </div>
+        <div class="qty-calculated" style="margin-top:10px">
+          <span class="label">⚡ Qtde Total calculada</span>
+          <span class="value" id="qtdeTotal">— —</span>
+        </div>
+      </div>
+
+      <!-- OPERAÇÃO -->
+      <div class="form-section">
+        <div class="form-section-title">Operação</div>
+        <div class="form-grid cols2">
+          <div class="field">
+            <label>Responsável</label>
+            <select id="f-responsavel">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Máquina</label>
+            <select id="f-maquina">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Fornecedor</label>
+            <select id="f-fornecedor">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Forma Pgto</label>
+            <select id="f-formapgto">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCEIRO -->
+      <div class="form-section">
+        <div class="form-section-title">Financeiro</div>
+        <div class="form-grid cols2">
+          <div class="field">
+            <label>Custo Unit (R$)</label>
+            <input type="number" id="f-custounit" placeholder="0,00" step="0.01" oninput="calcCusto()" />
+          </div>
+          <div class="qty-calculated">
+            <span class="label">💰 Custo Total</span>
+            <span class="value" id="custoTotal">— —</span>
+          </div>
+          <div class="field">
+            <label>Competência</label>
+            <input type="month" id="f-competencia" />
+          </div>
+          <div class="field">
+            <label>Vencimento</label>
+            <input type="date" id="f-vencimento" />
+          </div>
+        </div>
+      </div>
+
+      <!-- OBSERVAÇÕES -->
+      <div class="form-section">
+        <div class="form-section-title">Observações</div>
+        <div class="field">
+          <label>Documento / NF</label>
+          <input type="text" id="f-documento" placeholder="Nº nota fiscal, boleto..." />
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Observações</label>
+          <textarea id="f-obs" placeholder="Observações livres sobre esta operação..."></textarea>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <button class="btn btn-primary" onclick="salvarRegistro()" id="btnSalvar">
+        <span>💾 Salvar Movimentação</span>
+      </button>
+      <button class="btn btn-secondary" style="margin-top:8px" onclick="limparForm()">
+        🗑 Limpar Formulário
+      </button>
+    </main>
+  </div>
+
+  <!-- TAB: LISTA -->
+  <div id="tab-lista" style="display:none">
+    <main>
+      <div class="pending-header">
+        <h2>Registros Locais</h2>
+        <button class="btn-sm btn-secondary" style="width:auto;padding:6px 14px;font-size:12px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text);cursor:pointer;font-family:var(--sans);font-weight:600;" onclick="renderPending()">↻ Atualizar</button>
+      </div>
+      <div id="pendingList"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE: SINCRONIZAR ═══════════ -->
+<div class="page" id="page-sync">
+  <main>
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:4px">Sincronização</h2>
+      <p style="font-size:13px;color:var(--muted)">Envie os registros salvos offline para o servidor</p>
+    </div>
+
+    <div class="sync-panel">
+      <div class="sync-title">Status do Servidor</div>
+      <div class="sync-sub" id="syncServerDesc">Configure a URL do backend para sincronizar</div>
+      <div class="sync-stats">
+        <div class="stat-box"><div class="n" id="statPendentes">0</div><div class="l">Pendentes</div></div>
+        <div class="stat-box"><div class="n" id="statSincronizados">0</div><div class="l">Enviados</div></div>
+        <div class="stat-box"><div class="n" id="statErros">0</div><div class="l">Erros</div></div>
+      </div>
+      <button class="btn btn-primary" id="btnSync" onclick="sincronizar()">
+        <span>⟳ Sincronizar Agora</span>
+      </button>
+    </div>
+
+    <div class="export-section">
+      <h3>EXPORTAR DADOS</h3>
+      <div class="export-btns">
+        <button class="btn btn-secondary" onclick="exportCSV()">⬇ Exportar CSV (importar no Excel)</button>
+        <button class="btn btn-secondary" onclick="exportJSON()">⬇ Exportar JSON (backup)</button>
+      </div>
+    </div>
+
+    <div style="margin-top:24px">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--muted)">INSTRUÇÕES DE INTEGRAÇÃO</h3>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-size:12px;line-height:1.7;color:var(--muted)">
+        <strong style="color:var(--text)">Opção A — Firebase Firestore (recomendado)</strong><br>
+        1. Crie projeto em console.firebase.google.com<br>
+        2. Habilite Firestore Database<br>
+        3. Adicione config na tela de Configurações<br><br>
+        <strong style="color:var(--text)">Opção B — Google Sheets via Apps Script</strong><br>
+        1. Crie um Apps Script na sua planilha<br>
+        2. Publique como Web App (qualquer usuário)<br>
+        3. Cole a URL em Configurações → URL Backend<br><br>
+        <strong style="color:var(--text)">Exportar manualmente</strong><br>
+        Use o botão "Exportar CSV" e importe na aba MOVIMENTACOES_CAMPO
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════ PAGE: CONFIG ═══════════ -->
+<div class="page" id="page-config">
+  <main>
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:4px">Configurações</h2>
+      <p style="font-size:13px;color:var(--muted)">Personalize o app para sua fazenda</p>
+    </div>
+
+    <div class="config-section">
+      <div class="config-title">Propriedade</div>
+      <div class="field"><label>Nome da Propriedade</label><input type="text" id="cfg-prop" placeholder="Fazenda..." oninput="saveConfig()" /></div>
+      <div class="field" style="margin-top:10px"><label>Produtor Responsável</label><input type="text" id="cfg-prod" placeholder="Nome do produtor..." oninput="saveConfig()" /></div>
+    </div>
+
+    <div class="config-section">
+      <div class="config-title">Integração Backend</div>
+      <div class="field"><label>URL do Backend / Web App</label><input type="url" id="cfg-url" placeholder="https://script.google.com/..." oninput="saveConfig()" /></div>
+      <div class="field" style="margin-top:10px"><label>Chave de API (opcional)</label><input type="password" id="cfg-apikey" placeholder="••••••••" oninput="saveConfig()" /></div>
+    </div>
+
+    <div class="config-section">
+      <div class="config-title">Sincronização</div>
+      <div class="config-row">
+        <span class="config-row-label">Sync automático (ao conectar)</span>
+        <label style="cursor:pointer;display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="cfg-autosync" onchange="saveConfig()" style="width:auto;accent-color:var(--accent)" />
+          <span style="font-size:12px;color:var(--muted)">Ativo</span>
+        </label>
+      </div>
+      <div class="config-row">
+        <span class="config-row-label">Manter registros após sync</span>
+        <label style="cursor:pointer;display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="cfg-keepafter" onchange="saveConfig()" style="width:auto;accent-color:var(--accent)" checked />
+          <span style="font-size:12px;color:var(--muted)">Ativo</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="config-section">
+      <div class="config-title">Dados de Referência</div>
+      <button class="btn btn-secondary" onclick="reloadListas()" style="margin-bottom:8px">↻ Recarregar Listas (online)</button>
+      <button class="btn btn-secondary" style="margin-top:0" onclick="if(confirm('Apagar TODOS os registros locais?')) clearAll()">🗑 Limpar Todos os Dados Locais</button>
+    </div>
+
+    <div class="version-tag">JA Agro Campo · v1.0.0 · PWA</div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-registro" onclick="showPage('registro')">
+    <div class="nav-pip" id="pip-registro"></div>
+    <div class="nav-icon">📝</div>
+    <div class="nav-label">Registro</div>
+  </button>
+  <button class="nav-item has-pip" id="nav-sync" onclick="showPage('sync')">
+    <div class="nav-pip" id="pip-sync"></div>
+    <div class="nav-icon">⟳</div>
+    <div class="nav-label">Sincronizar</div>
+  </button>
+  <button class="nav-item" id="nav-config" onclick="showPage('config')">
+    <div class="nav-icon">⚙</div>
+    <div class="nav-label">Config</div>
+  </button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+//  STORAGE  (localStorage as IndexedDB-lite)
+// ═══════════════════════════════════════
+const DB_KEY     = 'ja_movimentacoes';
+const LISTAS_KEY = 'ja_listas';
+const CFG_KEY    = 'ja_config';
+const SYNC_KEY   = 'ja_sync_log';
+
+function getRegistros() { try { return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); } catch { return []; } }
+function saveRegistros(r){ localStorage.setItem(DB_KEY, JSON.stringify(r)); updateNavPip(); }
+function getListas()    { try { return JSON.parse(localStorage.getItem(LISTAS_KEY) || 'null'); } catch { return null; } }
+function saveListas(l)  { localStorage.setItem(LISTAS_KEY, JSON.stringify(l)); }
+function getConfig()    { try { return JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); } catch { return {}; } }
+function saveConfig()   {
+  const cfg = {
+    prop:      document.getElementById('cfg-prop')?.value,
+    prod:      document.getElementById('cfg-prod')?.value,
+    url:       document.getElementById('cfg-url')?.value,
+    apikey:    document.getElementById('cfg-apikey')?.value,
+    autosync:  document.getElementById('cfg-autosync')?.checked,
+    keepafter: document.getElementById('cfg-keepafter')?.checked,
+  };
+  localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+}
+function getSyncLog()   { try { return JSON.parse(localStorage.getItem(SYNC_KEY) || '[]'); } catch { return []; } }
+
+// ═══════════════════════════════════════
+//  LISTAS (dados de referência)
+// ═══════════════════════════════════════
+// Dados embutidos de fallback (baseados na planilha lida)
+const LISTAS_DEFAULT = {
+  safras:      ['2025-2026'],
+  talhoes:     ['CAF-01','CAF-02'],
+  atividades:  ['ADUBAÇÃO','PULVERIZAÇÃO','PLANTIO','COLHEITA','ROÇADA','PODA','ABASTECIMENTO','CUSTO DIVERSO'],
+  itens:       ['NPK CAFÉ 20-05-20','CLORETO DE POTÁSSIO CAFÉ','HERBICIDA CAFÉ','FUNGICIDA CAFÉ','HERBICIDA MILHO','FUNGICIDA MILHO','UREIA MILHO','SEMENTE MILHO'],
+  produtos:    ['YaraBela Nitromag 20-05-20','Fertipar NPK 20-05-20','KCl Mosaic','Roundup Original Mais','Amistar Top','Karate Zeon 250 CS','Ureia Perolada'],
+  responsaveis:['Equipe A','Equipe B'],
+  maquinas:    ['TRATOR TESTE','PULVERIZADOR TESTE','COLHEDORA'],
+  fornecedores:['Yara Brasil','Cooperativa Regional','Exportadora Modelo','Revenda'],
+  formaspgto:  ['À VISTA','PIX','BOLETO','PARCELADO 30/60/90'],
+  itemDoses: {
+    'NPK CAFÉ 20-05-20':        { min:200, max:300, ref:250, unit:'KG/HA' },
+    'CLORETO DE POTÁSSIO CAFÉ': { min:100, max:200, ref:150, unit:'KG/HA' },
+    'HERBICIDA CAFÉ':           { min:2,   max:4,   ref:3,   unit:'L/HA'  },
+    'FUNGICIDA CAFÉ':           { min:0.5, max:1.5, ref:1,   unit:'L/HA'  },
+  }
+};
+
+function getListas2() { return getListas() || LISTAS_DEFAULT; }
+
+function populateSelects() {
+  const L = getListas2();
+  fill('f-safra', L.safras);
+  fill('f-talhao', L.talhoes);
+  fill('f-atividade', L.atividades);
+  fill('f-item', L.itens);
+  fill('f-produto', L.produtos);
+  fill('f-responsavel', L.responsaveis);
+  fill('f-maquina', L.maquinas);
+  fill('f-fornecedor', L.fornecedores);
+  fill('f-formapgto', L.formaspgto);
+}
+
+function fill(id, arr) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const cur = el.value;
+  while (el.options.length > 1) el.remove(1);
+  (arr||[]).forEach(v => {
+    const o = document.createElement('option'); o.value = v; o.textContent = v; el.appendChild(o);
+  });
+  if (cur) el.value = cur;
+}
+
+async function reloadListas() {
+  const cfg = getConfig();
+  if (!cfg.url) { toast('Configure a URL do backend primeiro', 'error'); return; }
+  try {
+    toast('Buscando listas...');
+    const r = await fetch(cfg.url + '?action=getListas');
+    const d = await r.json();
+    saveListas(d);
+    populateSelects();
+    toast('Listas atualizadas ✓', 'success');
+  } catch(e) {
+    toast('Sem conexão — usando listas locais', 'error');
+  }
+}
+
+// ═══════════════════════════════════════
+//  CÁLCULOS
+// ═══════════════════════════════════════
+const AREA_TALHAO = { 'CAF-01': 12.5, 'CAF-02': 8.3 }; // fallback
+
+function getAreaTalhao() {
+  const talhao = document.getElementById('f-talhao').value;
+  return AREA_TALHAO[talhao] || 0;
+}
+
+function calcTotal() {
+  const qtdeha = parseFloat(document.getElementById('f-qtdeha').value) || 0;
+  const area   = parseFloat(document.getElementById('f-area').value)   || getAreaTalhao();
+  const total  = qtdeha * area;
+  document.getElementById('qtdeTotal').textContent = area
+    ? total.toLocaleString('pt-BR', {maximumFractionDigits:2}) + ' kg/L'
+    : '— informe área —';
+  checkDose(qtdeha);
+  calcCusto();
+}
+
+function calcCusto() {
+  const qtdeha    = parseFloat(document.getElementById('f-qtdeha').value) || 0;
+  const area      = parseFloat(document.getElementById('f-area').value)   || getAreaTalhao();
+  const custounit = parseFloat(document.getElementById('f-custounit').value) || 0;
+  const total     = qtdeha * area * custounit;
+  document.getElementById('custoTotal').textContent = total
+    ? 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits:2})
+    : '— —';
+}
+
+function checkDose(qtdeha) {
+  const item   = document.getElementById('f-item').value;
+  const L      = getListas2();
+  const doses  = L.itemDoses || {};
+  const d      = doses[item];
+  const el     = document.getElementById('doseAlert');
+  if (!d || !qtdeha) { el.className='dose-alert'; return; }
+  if (qtdeha < d.min || qtdeha > d.max) {
+    el.className = 'dose-alert warn show';
+    el.textContent = `⚠ Fora da faixa recomendada: ${d.min}–${d.max} ${d.unit}`;
+  } else {
+    el.className = 'dose-alert ok show';
+    el.textContent = `✓ Dose dentro da faixa (ref: ${d.ref} ${d.unit})`;
+  }
+}
+
+function onItemChange()     { checkDose(parseFloat(document.getElementById('f-qtdeha').value)||0); }
+function onAtividadeChange(){ /* future: filter items by atividade */ }
+
+// ═══════════════════════════════════════
+//  SALVAR REGISTRO
+// ═══════════════════════════════════════
+function salvarRegistro() {
+  const data      = document.getElementById('f-data').value;
+  const safra     = document.getElementById('f-safra').value;
+  const talhao    = document.getElementById('f-talhao').value;
+  const atividade = document.getElementById('f-atividade').value;
+  const qtdeha    = document.getElementById('f-qtdeha').value;
+
+  // Validação básica (campos obrigatórios A:H)
+  const erros = [];
+  if (!data)      erros.push('f-data');
+  if (!safra)     erros.push('f-safra');
+  if (!talhao)    erros.push('f-talhao');
+  if (!atividade) erros.push('f-atividade');
+  if (!qtdeha)    erros.push('f-qtdeha');
+
+  document.querySelectorAll('.field input,.field select').forEach(el => el.classList.remove('error'));
+  if (erros.length) {
+    erros.forEach(id => document.getElementById(id)?.classList.add('error'));
+    toast('Preencha os campos obrigatórios', 'error');
+    return;
+  }
+
+  const area      = parseFloat(document.getElementById('f-area').value) || getAreaTalhao();
+  const custounit = parseFloat(document.getElementById('f-custounit').value) || 0;
+  const qtdeTotal = parseFloat(qtdeha) * area;
+
+  const reg = {
+    id:              'MOV-' + Date.now(),
+    DATA:            data,
+    SAFRA:           safra,
+    TALHAO:          talhao,
+    ATIVIDADE:       atividade,
+    ITEM:            document.getElementById('f-item').value,
+    PRODUTO:         document.getElementById('f-produto').value,
+    APLICACAO:       document.getElementById('f-aplicacao').value,
+    QTDE_HA:         parseFloat(qtdeha),
+    QTDE_TOTAL:      qtdeTotal,
+    RESPONSAVEL:     document.getElementById('f-responsavel').value,
+    MAQUINA:         document.getElementById('f-maquina').value,
+    FORNECEDOR:      document.getElementById('f-fornecedor').value,
+    DOCUMENTO:       document.getElementById('f-documento').value,
+    OBS:             document.getElementById('f-obs').value,
+    FORMA_PAGAMENTO: document.getElementById('f-formapgto').value,
+    COMPETENCIA:     document.getElementById('f-competencia').value,
+    VENCIMENTO:      document.getElementById('f-vencimento').value,
+    CUSTO_UNIT:      custounit,
+    CUSTO_TOTAL:     qtdeTotal * custounit,
+    _status:         'pending',
+    _ts:             new Date().toISOString(),
+  };
+
+  const lista = getRegistros();
+  lista.unshift(reg);
+  saveRegistros(lista);
+  toast('Movimentação salva localmente ✓', 'success');
+  limparForm();
+  updateSyncStats();
+}
+
+function limparForm() {
+  ['f-data','f-item','f-produto','f-aplicacao','f-qtdeha','f-area','f-responsavel',
+   'f-maquina','f-fornecedor','f-formapgto','f-competencia','f-vencimento','f-custounit','f-documento','f-obs']
+   .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['f-safra','f-talhao','f-atividade'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('qtdeTotal').textContent = '— —';
+  document.getElementById('custoTotal').textContent = '— —';
+  document.getElementById('doseAlert').className = 'dose-alert';
+  document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+  // Set today
+  document.getElementById('f-data').value = new Date().toISOString().split('T')[0];
+}
+
+// ═══════════════════════════════════════
+//  PENDING LIST
+// ═══════════════════════════════════════
+function renderPending() {
+  const lista  = getRegistros();
+  const el     = document.getElementById('pendingList');
+  const cnt    = document.getElementById('tabCount');
+  const pendentes = lista.filter(r => r._status === 'pending').length;
+  cnt.textContent = pendentes ? `(${pendentes})` : '';
+
+  if (!lista.length) {
+    el.innerHTML = `<div class="pending-empty"><div class="icon">📭</div><div>Nenhum registro salvo ainda</div></div>`;
+    return;
+  }
+
+  el.innerHTML = lista.map(r => `
+    <div class="record-card ${r._status==='synced'?'synced':''}">
+      <div class="record-top">
+        <div class="record-title">${r.ATIVIDADE || '—'} · ${r.TALHAO || '—'}</div>
+        <div class="record-date">${r.DATA}</div>
+      </div>
+      <div class="record-meta">
+        <span class="chip">${r.SAFRA}</span>
+        ${r.ITEM ? `<span class="chip">${r.ITEM}</span>` : ''}
+        ${r.QTDE_HA ? `<span class="chip accent">${r.QTDE_HA} /ha</span>` : ''}
+        ${r.CUSTO_TOTAL ? `<span class="chip">R$ ${r.CUSTO_TOTAL.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>` : ''}
+        <span class="chip ${r._status==='synced'?'':'accent'}">${r._status==='synced'?'✓ Sincronizado':'⏳ Pendente'}</span>
+      </div>
+      <div class="record-actions">
+        <button class="btn-sm btn-del" onclick="deletarRegistro('${r.id}')">🗑 Remover</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deletarRegistro(id) {
+  if (!confirm('Remover este registro?')) return;
+  const lista = getRegistros().filter(r => r.id !== id);
+  saveRegistros(lista);
+  renderPending();
+  updateSyncStats();
+  toast('Registro removido');
+}
+
+// ═══════════════════════════════════════
+//  SINCRONIZAÇÃO
+// ═══════════════════════════════════════
+async function sincronizar() {
+  const cfg = getConfig();
+  if (!cfg.url) { toast('Configure a URL do backend em Configurações', 'error'); return; }
+
+  const btn = document.getElementById('btnSync');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Sincronizando...';
+
+  const lista     = getRegistros();
+  const pendentes = lista.filter(r => r._status === 'pending');
+
+  if (!pendentes.length) {
+    toast('Nenhum registro pendente', 'success');
+    btn.disabled = false;
+    btn.innerHTML = '<span>⟳ Sincronizar Agora</span>';
+    return;
+  }
+
+  let ok = 0, err = 0;
+  for (const reg of pendentes) {
+    try {
+      const res = await fetch(cfg.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(cfg.apikey ? {'Authorization': cfg.apikey} : {}) },
+        body: JSON.stringify({ action: 'addMovimentacao', data: reg })
+      });
+      if (res.ok) { reg._status = 'synced'; ok++; }
+      else { err++; }
+    } catch { err++; }
+  }
+
+  saveRegistros(lista);
+  updateSyncStats();
+  renderPending();
+
+  btn.disabled = false;
+  btn.innerHTML = '<span>⟳ Sincronizar Agora</span>';
+
+  if (err === 0) toast(`${ok} registro(s) sincronizado(s) ✓`, 'success');
+  else toast(`${ok} OK · ${err} com erro`, 'error');
+}
+
+function updateSyncStats() {
+  const lista    = getRegistros();
+  const pending  = lista.filter(r => r._status === 'pending').length;
+  const synced   = lista.filter(r => r._status === 'synced').length;
+  const errors   = lista.filter(r => r._status === 'error').length;
+  document.getElementById('statPendentes').textContent     = pending;
+  document.getElementById('statSincronizados').textContent = synced;
+  document.getElementById('statErros').textContent         = errors;
+  // pip no nav
+  const pip = document.getElementById('pip-sync');
+  if (pip) { pip.style.display = pending > 0 ? 'block' : 'none'; }
+  document.getElementById('nav-sync').classList.toggle('has-pip', pending > 0);
+}
+
+// ═══════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════
+function exportCSV() {
+  const lista = getRegistros();
+  if (!lista.length) { toast('Nenhum registro para exportar', 'error'); return; }
+  const headers = ['DATA','SAFRA','TALHAO','ATIVIDADE','ITEM','PRODUTO','APLICACAO','QTDE_HA','QTDE_TOTAL','RESPONSAVEL','MAQUINA','FORNECEDOR','DOCUMENTO','OBS','FORMA_PAGAMENTO','COMPETENCIA','VENCIMENTO','CUSTO_UNIT','CUSTO_TOTAL'];
+  const rows = lista.map(r => headers.map(h => `"${(r[h]||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv  = [headers.join(','), ...rows].join('\n');
+  download('movimentacoes_campo_' + new Date().toISOString().split('T')[0] + '.csv', csv, 'text/csv');
+  toast('CSV exportado ✓', 'success');
+}
+
+function exportJSON() {
+  const lista = getRegistros();
+  download('backup_campo_' + Date.now() + '.json', JSON.stringify(lista, null, 2), 'application/json');
+  toast('JSON exportado ✓', 'success');
+}
+
+function download(name, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name; a.click();
+}
+
+function clearAll() {
+  localStorage.removeItem(DB_KEY);
+  updateNavPip();
+  updateSyncStats();
+  renderPending();
+  toast('Dados locais apagados');
+}
+
+// ═══════════════════════════════════════
+//  NAVEGAÇÃO
+// ═══════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name)?.classList.add('active');
+  document.getElementById('nav-'  + name)?.classList.add('active');
+  document.getElementById('tabBar').style.display = name === 'registro' ? 'flex' : 'none';
+  if (name === 'sync')   updateSyncStats();
+  if (name === 'config') loadConfigUI();
+}
+
+let currentTab = 'novo';
+function setTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='novo')||(i===1&&t==='lista')));
+  document.getElementById('tab-novo').style.display  = t === 'novo'  ? 'block' : 'none';
+  document.getElementById('tab-lista').style.display = t === 'lista' ? 'block' : 'none';
+  if (t === 'lista') renderPending();
+}
+
+function updateNavPip() {
+  const n = getRegistros().filter(r => r._status === 'pending').length;
+  document.getElementById('nav-sync').classList.toggle('has-pip', n > 0);
+}
+
+// ═══════════════════════════════════════
+//  CONNECTIVITY
+// ═══════════════════════════════════════
+function updateOnlineStatus() {
+  const online = navigator.onLine;
+  const badge  = document.getElementById('syncBadge');
+  const text   = document.getElementById('syncText');
+  badge.className = 'sync-badge ' + (online ? 'online' : 'offline');
+  text.textContent = online ? 'Online' : 'Offline';
+  if (online) {
+    const cfg = getConfig();
+    if (cfg.autosync) sincronizar();
+  }
+}
+
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// ═══════════════════════════════════════
+//  CONFIG UI
+// ═══════════════════════════════════════
+function loadConfigUI() {
+  const cfg = getConfig();
+  if (cfg.prop)      document.getElementById('cfg-prop').value     = cfg.prop;
+  if (cfg.prod)      document.getElementById('cfg-prod').value     = cfg.prod;
+  if (cfg.url)       document.getElementById('cfg-url').value      = cfg.url;
+  if (cfg.apikey)    document.getElementById('cfg-apikey').value   = cfg.apikey;
+  document.getElementById('cfg-autosync').checked  = !!cfg.autosync;
+  document.getElementById('cfg-keepafter').checked = cfg.keepafter !== false;
+}
+
+// ═══════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════
+let toastTimer;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 2800);
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  populateSelects();
+  document.getElementById('f-data').value = new Date().toISOString().split('T')[0];
+  updateOnlineStatus();
+  updateNavPip();
+  updateSyncStats();
+  document.getElementById('tabBar').style.display = 'flex';
+});
+
+// ═══════════════════════════════════════
+//  SERVICE WORKER REGISTRATION
+// ═══════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('SW registrado'))
+      .catch(() => console.log('SW não disponível neste contexto'));
+  });
+}
+</script>
+</body>
+</html>
