@@ -555,29 +555,39 @@ const DFLT={
   itemCusto:{'NPK CAFÉ 20-05-20':3.80,'CLORETO DE POTÁSSIO CAFÉ':2.50,'HERBICIDA CAFÉ':28.0,'FUNGICIDA CAFÉ':95.0},
 };
 
-// ─── LOGIN ───
-(function(){
-  const ins=document.querySelectorAll('#digs input');
+// ─── LOGIN DÍGITOS ───
+function initDigs(){
+  const ins=[...document.querySelectorAll('#digs input')];
+  if(!ins.length)return;
+  function syncBtn(){
+    const ok=ins.every(i=>i.value.match(/\d/));
+    document.getElementById('btnLogin').disabled=!ok;
+    if(ok)document.getElementById('lerr').textContent='';
+  }
   ins.forEach((inp,i)=>{
     inp.addEventListener('input',()=>{
       inp.value=inp.value.replace(/\D/g,'').slice(-1);
       inp.classList.toggle('ok',!!inp.value);
-      if(inp.value&&i<5)ins[i+1].focus();
-      document.getElementById('btnLogin').disabled=getCode().length<6;
+      if(inp.value&&i<ins.length-1)ins[i+1].focus();
+      syncBtn();
     });
     inp.addEventListener('keydown',e=>{
       if(e.key==='Backspace'&&!inp.value&&i>0){ins[i-1].focus();ins[i-1].value='';ins[i-1].classList.remove('ok');}
+      if(e.key==='Enter'&&getCode().length===6)doLogin();
+      syncBtn();
     });
     inp.addEventListener('paste',e=>{
       e.preventDefault();
       const p=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
-      p.split('').forEach((c,j)=>{if(ins[j]){ins[j].value=c;ins[j].classList.add('ok');}});
-      ins[Math.min(p.length,5)].focus();
-      document.getElementById('btnLogin').disabled=p.length<6;
+      ins.forEach((el,j)=>{el.value=p[j]||'';el.classList.toggle('ok',!!el.value);});
+      ins[Math.min(p.length,ins.length-1)].focus();
+      syncBtn();
     });
+    inp.addEventListener('focus',()=>inp.select());
   });
   ins[0].focus();
-})();
+  syncBtn();
+}
 
 function getCode(){return[...document.querySelectorAll('#digs input')].map(i=>i.value).join('')}
 
@@ -636,25 +646,23 @@ function initApp(sess){
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
-  const s=getSess();if(s){initApp(s);return;}
+  /* inicializa campos de dígito */
+  initDigs();
+
+  /* auto-login se já tem sessão salva */
+  const s=getSess();
+  if(s){initApp(s);return;}
+
+  /* preenche via link mágico ?code=XXXXXX */
   const c=new URLSearchParams(location.search).get('code');
   if(c&&c.length===6){
-    const ins=document.querySelectorAll('#digs input');
-    c.split('').forEach((ch,i)=>{if(ins[i]){ins[i].value=ch;ins[i].classList.add('ok');}});
+    const ins=[...document.querySelectorAll('#digs input')];
+    c.split('').forEach((ch,i)=>{
+      if(ins[i]){ins[i].value=ch;ins[i].classList.add('ok');}
+    });
     document.getElementById('btnLogin').disabled=false;
     setTimeout(doLogin,600);
   }
-});
-
-/* garante que o botão habilita sempre que 6 dígitos estão presentes */
-document.addEventListener('DOMContentLoaded',()=>{
-  function checkBtn(){
-    document.getElementById('btnLogin').disabled=getCode().length<6;
-  }
-  document.querySelectorAll('#digs input').forEach(inp=>{
-    inp.addEventListener('input',checkBtn);
-    inp.addEventListener('keyup',checkBtn);
-  });
 });
 
 function sair(){
