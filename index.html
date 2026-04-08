@@ -243,6 +243,42 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
     <div class="lhelp">Não tem código? Fale com o consultor JA Agro.</div>
   </div>
 </div>
+<script>
+// Roda imediatamente após o HTML do login estar no DOM
+(function tryInitDigs(){
+  var ins = document.querySelectorAll('#digs input');
+  if(!ins.length){ setTimeout(tryInitDigs, 50); return; }
+  var btn = document.getElementById('btnLogin');
+  function sync(){
+    var ok = [].every.call(ins, function(i){ return /\d/.test(i.value); });
+    btn.disabled = !ok;
+  }
+  [].forEach.call(ins, function(inp, idx){
+    inp.addEventListener('input', function(){
+      inp.value = inp.value.replace(/\D/g,'').slice(-1);
+      inp.classList.toggle('ok', !!inp.value);
+      if(inp.value && idx < ins.length-1) ins[idx+1].focus();
+      sync();
+    });
+    inp.addEventListener('keydown', function(e){
+      if(e.key==='Backspace' && !inp.value && idx>0){
+        ins[idx-1].focus(); ins[idx-1].value=''; ins[idx-1].classList.remove('ok');
+      }
+      sync();
+    });
+    inp.addEventListener('paste', function(e){
+      e.preventDefault();
+      var p = (e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+      [].forEach.call(ins, function(el,j){ el.value=p[j]||''; el.classList.toggle('ok',!!el.value); });
+      ins[Math.min(p.length, ins.length-1)].focus();
+      sync();
+    });
+    inp.addEventListener('focus', function(){ inp.select(); });
+  });
+  ins[0].focus();
+  sync();
+})();
+</script>
 
 <!-- ━━━━━━━━━━ APP ━━━━━━━━━━ -->
 <div class="sc" id="scApp">
@@ -509,7 +545,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
      CONFIGURAÇÕES — edite apenas o arquivo config.js
      Não é necessário mexer neste arquivo index.html
 ═══════════════════════════════════════════════════ -->
-<script src="config.js"></script>
+<script>window.JA_CONFIG = window.JA_CONFIG || { firebase: { apiKey: '' }, appUrl: '' };</script>
+<script src="config.js" onerror="console.warn('config.js nao encontrado')"></script>
 <script>
 // ─── FIREBASE ───
 let db;
