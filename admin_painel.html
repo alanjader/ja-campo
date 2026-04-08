@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>JA Agro · Painel Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <style>
+    :root{
+      --bg:#0a0a0a;--surface:#111;--card:#161616;--border:#252525;
+      --accent:#5dba47;--accent2:#a3e635;--text:#f0f0f0;--muted:#777;
+      --danger:#ff6b6b;--warn:#f5a623;--info:#4a9eff;
+      --mono:'DM Mono',monospace;--sans:'Syne',sans-serif;--r:10px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+
+    /* ── LOGIN ADMIN ── */
+    #scAdminLogin{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;
+    }
+    .admin-login-box{
+      width:100%;max-width:360px;background:var(--card);
+      border:1.5px solid var(--border);border-radius:16px;padding:32px;
+    }
+    .admin-login-box h1{font-size:22px;font-weight:800;margin-bottom:4px}
+    .admin-login-box h1 span{color:var(--accent)}
+    .admin-login-box p{font-size:13px;color:var(--muted);margin-bottom:24px}
+    .admin-login-box .field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+    .admin-login-box label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+    .admin-login-box input{
+      background:var(--surface);border:1.5px solid var(--border);color:var(--text);
+      font-family:var(--sans);font-size:15px;padding:11px 14px;border-radius:var(--r);
+      outline:none;width:100%;transition:border-color .2s;
+    }
+    .admin-login-box input:focus{border-color:var(--accent)}
+    .admin-err{font-size:12px;color:var(--danger);margin-bottom:10px;min-height:16px}
+
+    /* ── LAYOUT ── */
+    #scAdmin{display:none;min-height:100vh}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:16px 32px;border-bottom:1px solid var(--border);
+      background:rgba(10,10,10,.95);backdrop-filter:blur(12px);
+      position:sticky;top:0;z-index:100;
+    }
+    .topbar-logo{font-size:20px;font-weight:800}
+    .topbar-logo span{color:var(--accent)}
+    .topbar-badge{font-family:var(--mono);font-size:11px;background:var(--surface);border:1px solid var(--border);padding:4px 12px;border-radius:20px;color:var(--muted)}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .admin-email{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+    .layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 57px)}
+
+    /* ── SIDEBAR ── */
+    .sidebar{border-right:1px solid var(--border);padding:20px 0}
+    .sidebar-item{
+      display:flex;align-items:center;gap:10px;
+      padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;
+      transition:all .15s;color:var(--muted);border:none;background:none;
+      width:100%;text-align:left;border-left:3px solid transparent;
+    }
+    .sidebar-item:hover{color:var(--text);background:rgba(255,255,255,.04)}
+    .sidebar-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(93,186,71,.06)}
+    .sidebar-icon{font-size:16px}
+    .sidebar-section{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;padding:16px 20px 6px}
+
+    /* ── CONTENT ── */
+    .content{padding:28px 32px;max-width:960px}
+    .page-header{margin-bottom:24px}
+    .page-header h2{font-size:22px;font-weight:700}
+    .page-header p{font-size:13px;color:var(--muted);margin-top:4px}
+
+    /* ── STATS CARDS ── */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+    .stat-card .num{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--accent)}
+    .stat-card .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+
+    /* ── TABLE ── */
+    .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+    .table-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
+    .table-head h3{font-size:15px;font-weight:700}
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;padding:10px 16px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);background:var(--surface)}
+    td{padding:12px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .td-mono{font-family:var(--mono);font-size:12px}
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;font-family:var(--mono)}
+    .badge-ok{background:rgba(93,186,71,.15);color:var(--accent);border:1px solid rgba(93,186,71,.3)}
+    .badge-off{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border)}
+    .badge-warn{background:rgba(245,166,35,.15);color:var(--warn);border:1px solid rgba(245,166,35,.3)}
+    .dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+
+    /* ── ACTIONS ── */
+    .actions{display:flex;gap:6px}
+    .act-btn{padding:5px 12px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:var(--sans);transition:all .15s}
+    .act-edit{background:rgba(93,186,71,.12);color:var(--accent);border:1px solid rgba(93,186,71,.25)}
+    .act-del{background:rgba(255,107,107,.1);color:var(--danger);border:1px solid rgba(255,107,107,.2)}
+    .act-copy{background:rgba(74,158,255,.1);color:var(--info);border:1px solid rgba(74,158,255,.2)}
+    .act-btn:hover{filter:brightness(1.2)}
+
+    /* ── BUTTONS ── */
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .15s;text-decoration:none}
+    .btn-primary{background:var(--accent);color:#0a0a0a}
+    .btn-primary:hover{background:var(--accent2)}
+    .btn-secondary{background:var(--card);color:var(--text);border:1.5px solid var(--border)}
+    .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-sm{padding:7px 14px;font-size:12px}
+
+    /* ── MODAL ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:24px}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:20px}
+    .modal-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+    .modal-field label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+    .modal-field input,.modal-field select{
+      background:var(--surface);border:1.5px solid var(--border);color:var(--text);
+      font-family:var(--sans);font-size:14px;padding:10px 13px;border-radius:8px;outline:none;width:100%;
+    }
+    .modal-field input:focus,.modal-field select:focus{border-color:var(--accent)}
+    .modal-field small{font-size:11px;color:var(--muted);margin-top:2px}
+    .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+    .modal-err{font-size:12px;color:var(--danger);margin-bottom:10px;min-height:16px}
+
+    /* ── CODE DISPLAY ── */
+    .code-display{
+      display:flex;align-items:center;justify-content:center;
+      gap:6px;padding:20px;border-radius:12px;
+      background:var(--surface);border:1px solid var(--border);
+      font-family:var(--mono);font-size:36px;font-weight:500;letter-spacing:10px;
+      color:var(--accent);margin:16px 0;
+    }
+    .code-hint{text-align:center;font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+    .share-link{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:12px;
+      color:var(--muted);word-break:break-all;margin-bottom:12px;
+    }
+
+    /* ── TOAST ── */
+    #adminToast{
+      position:fixed;bottom:24px;right:24px;
+      background:var(--card);border:1px solid var(--border);
+      color:var(--text);padding:12px 20px;border-radius:10px;
+      font-size:13px;font-weight:600;opacity:0;transition:all .25s;z-index:999;
+      box-shadow:0 8px 32px rgba(0,0,0,.5);transform:translateY(12px);
+    }
+    #adminToast.show{opacity:1;transform:translateY(0)}
+    #adminToast.ok{border-color:var(--accent);color:var(--accent)}
+    #adminToast.bad{border-color:var(--danger);color:var(--danger)}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);padding:8px 0}
+      .sidebar-section{display:none}
+      .stats-row{grid-template-columns:repeat(2,1fr)}
+      .content{padding:20px 16px}
+    }
+
+    .pag{display:none}
+    .pag.active{display:block}
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════ ADMIN LOGIN ══════════════════════ -->
+<div id="scAdminLogin">
+  <div class="admin-login-box">
+    <h1>JA <span>Agro</span> · Admin</h1>
+    <p>Acesso restrito ao administrador do sistema.</p>
+    <div class="field"><label>E-mail</label>
+      <input type="email" id="adminEmail" placeholder="admin@jaagro.com.br"/>
+    </div>
+    <div class="field"><label>Senha</label>
+      <input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginAdmin()"/>
+    </div>
+    <div class="admin-err" id="adminErr"></div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:14px" id="btnAdminLogin" onclick="loginAdmin()">
+      Entrar como Admin
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAINEL ADMIN ══════════════════════ -->
+<div id="scAdmin">
+
+  <div class="topbar">
+    <div class="topbar-logo">JA <span>Agro</span> · Admin</div>
+    <div class="topbar-right">
+      <div class="admin-email" id="adminEmailDisplay">—</div>
+      <div class="topbar-badge">ADMIN</div>
+      <button class="btn btn-secondary btn-sm" onclick="logoutAdmin()">Sair</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">Gestão</div>
+      <button class="sidebar-item active" onclick="showPag('produtores')">
+        <span class="sidebar-icon">👥</span> Produtores
+      </button>
+      <button class="sidebar-item" onclick="showPag('logs')">
+        <span class="sidebar-icon">📋</span> Acessos
+      </button>
+      <div class="sidebar-section">Sistema</div>
+      <button class="sidebar-item" onclick="showPag('config')">
+        <span class="sidebar-icon">⚙</span> Configurações
+      </button>
+      <button class="sidebar-item" onclick="showPag('deploy')">
+        <span class="sidebar-icon">🚀</span> Deploy / URLs
+      </button>
+    </aside>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ── PÁGINA: PRODUTORES ── -->
+      <div class="pag active" id="pag-produtores">
+        <div class="page-header">
+          <h2>Produtores</h2>
+          <p>Gerencie os produtores cadastrados e seus vínculos com as planilhas</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+          <div class="stat-card"><div class="num" id="stTotal">0</div><div class="lbl">Total cadastrados</div></div>
+          <div class="stat-card"><div class="num" id="stAtivos">0</div><div class="lbl">Ativos</div></div>
+          <div class="stat-card"><div class="num" id="stInativos">0</div><div class="lbl">Inativos</div></div>
+          <div class="stat-card"><div class="num" id="stSemUrl">0</div><div class="lbl">Sem planilha vinculada</div></div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-wrap">
+          <div class="table-head">
+            <h3>Lista de Produtores</h3>
+            <button class="btn btn-primary btn-sm" onclick="openModal()">＋ Novo Produtor</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Produtor</th>
+                <th>Propriedade</th>
+                <th>Código</th>
+                <th>Planilha (Apps Script)</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tblProdutores">
+              <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── PÁGINA: LOGS ── -->
+      <div class="pag" id="pag-logs">
+        <div class="page-header">
+          <h2>Histórico de Acessos</h2>
+          <p>Registros de login dos produtores no app</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data/Hora</th><th>Produtor</th><th>Propriedade</th><th>Ação</th></tr></thead>
+            <tbody id="tblLogs">
+              <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:40px">Sem registros</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── PÁGINA: CONFIG ── -->
+      <div class="pag" id="pag-config">
+        <div class="page-header"><h2>Configurações do Sistema</h2></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:16px">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:14px">Firebase</h3>
+          <div style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:2">
+            <div>Projeto: <span style="color:var(--accent)" id="cfgProject">—</span></div>
+            <div>Auth: <span style="color:var(--accent)">Email/Senha</span></div>
+            <div>Firestore: <span style="color:var(--accent)">Collection: produtores</span></div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:14px">Estrutura Firestore</h3>
+          <pre style="font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.8;white-space:pre-wrap">Collection: produtores
+  Document ID: (auto)
+  Fields:
+    codigo:       string   // 6 dígitos únicos
+    produtor:     string   // nome completo
+    propriedade:  string   // nome da fazenda
+    backendUrl:   string   // URL do Apps Script
+    ativo:        boolean  // acesso liberado
+    criadoEm:     timestamp
+    ultimoAcesso: timestamp</pre>
+        </div>
+      </div>
+
+      <!-- ── PÁGINA: DEPLOY ── -->
+      <div class="pag" id="pag-deploy">
+        <div class="page-header">
+          <h2>Guia de Deploy</h2>
+          <p>Passo a passo para colocar o sistema no ar</p>
+        </div>
+
+        <div id="deploySteps"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /layout -->
+</div>
+
+<!-- ══════════════════════ MODAL: NOVO/EDITAR PRODUTOR ══════════════════════ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Novo Produtor</h3>
+
+    <div class="modal-field">
+      <label>Nome do Produtor *</label>
+      <input type="text" id="mProd" placeholder="João da Silva"/>
+    </div>
+    <div class="modal-field">
+      <label>Nome da Propriedade *</label>
+      <input type="text" id="mProp" placeholder="Fazenda Santa Clara"/>
+    </div>
+    <div class="modal-field">
+      <label>Código de Acesso (6 dígitos) *</label>
+      <input type="text" id="mCode" placeholder="Auto-gerado" maxlength="6" pattern="[0-9]{6}"
+             oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"/>
+      <small>Deixe vazio para gerar automaticamente</small>
+    </div>
+    <div class="modal-field">
+      <label>URL do Apps Script (planilha) *</label>
+      <input type="url" id="mUrl" placeholder="https://script.google.com/macros/s/.../exec"/>
+      <small>URL gerada ao publicar o Apps Script na planilha Google Sheets do produtor</small>
+    </div>
+    <div class="modal-field">
+      <label>Status</label>
+      <select id="mAtivo">
+        <option value="true">Ativo (acesso liberado)</option>
+        <option value="false">Inativo (acesso bloqueado)</option>
+      </select>
+    </div>
+
+    <div class="modal-err" id="modalErr"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="btnSalvarModal" onclick="salvarProdutor()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ MODAL: EXIBIR CÓDIGO ══════════════════════ -->
+<div class="modal-overlay" id="modalCode">
+  <div class="modal" style="max-width:420px;text-align:center">
+    <h3>Código de Acesso Gerado</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Compartilhe com o produtor</p>
+    <div class="code-display" id="codeDisplayNum">— — — — — —</div>
+    <div class="code-hint">
+      O produtor digita este código no app para acessar a planilha dele.<br/>
+      Cada código é único e exclusivo por produtor.
+    </div>
+    <div style="text-align:left;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600">LINK DIRETO (WhatsApp / e-mail):</div>
+    <div class="share-link" id="shareLinkDisplay">—</div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="btn btn-secondary btn-sm" onclick="copiarLink()">📋 Copiar Link</button>
+      <button class="btn btn-secondary btn-sm" onclick="copiarCodigo()">🔢 Copiar Código</button>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('modalCode').classList.remove('open')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div id="adminToast"></div>
+
+<!-- ══════════════════════ CONFIG FIREBASE ══════════════════════ -->
+<script>
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyA1wZeESWWjZ3uQlJq4IqVl0RtZbJBDoqk",
+  authDomain:        "ja-agro.firebaseapp.com",
+  projectId:         "ja-agro",
+  storageBucket:     "ja-agro.firebasestorage.app",
+  messagingSenderId: "631857913629",
+  appId:             "1:631857913629:web:1e6c7a1ce32a14975a0bf4"
+};
+// URL do app mobile (para gerar links de acesso)
+const APP_URL = "https://alanjader.github.io/ja-campo/";
+</script>
+
+<script>
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ══════════════════════
+// AUTH ADMIN
+// ══════════════════════
+async function loginAdmin() {
+  const email = document.getElementById('adminEmail').value.trim();
+  const pass  = document.getElementById('adminPass').value;
+  const btn   = document.getElementById('btnAdminLogin');
+  const err   = document.getElementById('adminErr');
+
+  if (!email || !pass) { err.textContent='Preencha e-mail e senha'; return; }
+
+  btn.disabled=true; btn.textContent='Entrando...'; err.textContent='';
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e) {
+    err.textContent = e.code==='auth/wrong-password'||e.code==='auth/user-not-found'
+      ? 'E-mail ou senha incorretos'
+      : 'Erro: '+e.message;
+    btn.disabled=false; btn.textContent='Entrar como Admin';
+  }
+}
+
+function logoutAdmin() {
+  if(!confirm('Sair do painel?')) return;
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('scAdminLogin').style.display='none';
+    document.getElementById('scAdmin').style.display='block';
+    document.getElementById('adminEmailDisplay').textContent = user.email;
+    document.getElementById('cfgProject').textContent = FIREBASE_CONFIG.projectId;
+    loadProdutores();
+    renderDeploy();
+  } else {
+    document.getElementById('scAdminLogin').style.display='flex';
+    document.getElementById('scAdmin').style.display='none';
+  }
+});
+
+// ══════════════════════
+// PRODUTORES — CRUD
+// ══════════════════════
+let produtoresList = [];
+let editingId = null;
+
+async function loadProdutores() {
+  try {
+    const snap = await db.collection('produtores').orderBy('criadoEm','desc').get();
+    produtoresList = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderTable();
+    renderStats();
+  } catch(e) {
+    atToast('Erro ao carregar: '+e.message,'bad');
+  }
+}
+
+function renderStats() {
+  const total    = produtoresList.length;
+  const ativos   = produtoresList.filter(p=>p.ativo).length;
+  const inativos = total - ativos;
+  const semUrl   = produtoresList.filter(p=>!p.backendUrl).length;
+  document.getElementById('stTotal').textContent   = total;
+  document.getElementById('stAtivos').textContent  = ativos;
+  document.getElementById('stInativos').textContent= inativos;
+  document.getElementById('stSemUrl').textContent  = semUrl;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tblProdutores');
+  if (!produtoresList.length) {
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px">Nenhum produtor cadastrado ainda</td></tr>';
+    return;
+  }
+  tbody.innerHTML = produtoresList.map(p=>`
+    <tr>
+      <td><strong>${p.produtor||'—'}</strong></td>
+      <td>${p.propriedade||'—'}</td>
+      <td><span class="td-mono" style="letter-spacing:3px;color:var(--accent)">${p.codigo||'—'}</span></td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+        ${p.backendUrl
+          ? `<span class="td-mono" style="font-size:11px;color:var(--muted)">${p.backendUrl.substring(0,40)}…</span>`
+          : `<span style="color:var(--warn);font-size:12px">⚠ Não vinculada</span>`}
+      </td>
+      <td>
+        <span class="badge ${p.ativo?'badge-ok':'badge-off'}">
+          <span class="dot"></span>${p.ativo?'Ativo':'Inativo'}
+        </span>
+      </td>
+      <td>
+        <div class="actions">
+          <button class="act-btn act-copy" onclick="showCode('${p.codigo}','${p.produtor}')">🔑 Código</button>
+          <button class="act-btn act-edit" onclick="editProdutor('${p.id}')">✏ Editar</button>
+          <button class="act-btn act-del"  onclick="toggleAtivo('${p.id}',${p.ativo})">${p.ativo?'🔒 Desativar':'✅ Ativar'}</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openModal(id=null) {
+  editingId = id;
+  document.getElementById('modalErr').textContent='';
+  document.getElementById('modalTitle').textContent = id?'Editar Produtor':'Novo Produtor';
+  if (id) {
+    const p = produtoresList.find(x=>x.id===id);
+    if (!p) return;
+    document.getElementById('mProd').value  = p.produtor||'';
+    document.getElementById('mProp').value  = p.propriedade||'';
+    document.getElementById('mCode').value  = p.codigo||'';
+    document.getElementById('mUrl').value   = p.backendUrl||'';
+    document.getElementById('mAtivo').value = p.ativo?'true':'false';
+  } else {
+    ['mProd','mProp','mCode','mUrl'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('mAtivo').value='true';
+    document.getElementById('mCode').placeholder = gerarCodigo();
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  editingId=null;
+}
+
+async function salvarProdutor() {
+  const prod = document.getElementById('mProd').value.trim();
+  const prop = document.getElementById('mProp').value.trim();
+  const url  = document.getElementById('mUrl').value.trim();
+  let   code = document.getElementById('mCode').value.trim();
+  const ativ = document.getElementById('mAtivo').value === 'true';
+  const err  = document.getElementById('modalErr');
+
+  if (!prod||!prop) { err.textContent='Nome e propriedade são obrigatórios'; return; }
+  if (url && !url.startsWith('https://')) { err.textContent='URL deve começar com https://'; return; }
+
+  if (!code) code = gerarCodigo();
+  if (!/^\d{6}$/.test(code)) { err.textContent='Código deve ter exatamente 6 dígitos'; return; }
+
+  // Verificar código único (exceto no editar do mesmo)
+  const existente = produtoresList.find(p=>p.codigo===code && p.id!==editingId);
+  if (existente) { err.textContent='Este código já está em uso por '+existente.produtor; return; }
+
+  const btn = document.getElementById('btnSalvarModal');
+  btn.disabled=true; btn.textContent='Salvando...'; err.textContent='';
+
+  try {
+    const data = {
+      produtor:    prod,
+      propriedade: prop,
+      codigo:      code,
+      backendUrl:  url,
+      ativo:       ativ,
+    };
+
+    if (editingId) {
+      await db.collection('produtores').doc(editingId).update(data);
+      atToast('Produtor atualizado ✓','ok');
+    } else {
+      data.criadoEm     = firebase.firestore.FieldValue.serverTimestamp();
+      data.ultimoAcesso = null;
+      await db.collection('produtores').add(data);
+      atToast('Produtor cadastrado ✓','ok');
+      closeModal();
+      showCode(code, prod);
+    }
+
+    await loadProdutores();
+    if(editingId) closeModal();
+  } catch(e) {
+    err.textContent='Erro: '+e.message;
+  } finally {
+    btn.disabled=false; btn.textContent='Salvar';
+  }
+}
+
+async function toggleAtivo(id, atualAtivo) {
+  const acao = atualAtivo ? 'desativar' : 'ativar';
+  if (!confirm(`Confirma ${acao} este produtor?`)) return;
+  try {
+    await db.collection('produtores').doc(id).update({ ativo: !atualAtivo });
+    await loadProdutores();
+    atToast(`Produtor ${acao}do ✓`,'ok');
+  } catch(e) {
+    atToast('Erro: '+e.message,'bad');
+  }
+}
+
+function editProdutor(id) { openModal(id); }
+
+// ══════════════════════
+// CÓDIGO / COMPARTILHAR
+// ══════════════════════
+function gerarCodigo() {
+  return String(Math.floor(100000 + Math.random()*900000));
+}
+
+function showCode(code, produtor) {
+  document.getElementById('codeDisplayNum').textContent = code.split('').join(' ');
+  const link = APP_URL + '?code=' + code;
+  document.getElementById('shareLinkDisplay').textContent = link;
+  document.getElementById('modalCode').classList.add('open');
+}
+
+function copiarCodigo() {
+  const code = document.getElementById('codeDisplayNum').textContent.replace(/\s/g,'');
+  navigator.clipboard.writeText(code).then(()=>atToast('Código copiado ✓','ok'));
+}
+
+function copiarLink() {
+  const link = document.getElementById('shareLinkDisplay').textContent;
+  navigator.clipboard.writeText(link).then(()=>atToast('Link copiado ✓','ok'));
+}
+
+// ══════════════════════
+// NAVEGAÇÃO
+// ══════════════════════
+function showPag(name) {
+  document.querySelectorAll('.pag').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('pag-'+name)?.classList.add('active');
+  event?.currentTarget?.classList.add('active');
+}
+
+// ══════════════════════
+// DEPLOY GUIDE
+// ══════════════════════
+function renderDeploy() {
+  const steps = [
+    {
+      n:1, title:'Converter a planilha para Google Sheets',
+      color:'#5dba47',
+      items:[
+        'Acesse drive.google.com com sua conta Google',
+        'Faça upload do arquivo Ultima_V1_OFICIAL.xlsx',
+        'Clique com botão direito → "Abrir com" → Google Planilhas',
+        'Google Sheets converte automaticamente mantendo todas as fórmulas',
+        'Renomeie o arquivo: "JA Agro - [Nome do Produtor]"',
+        'Compartilhe com o e-mail do produtor (visualizador ou editor)',
+      ]
+    },
+    {
+      n:2, title:'Adicionar o Apps Script na planilha do produtor',
+      color:'#4a9eff',
+      items:[
+        'Com a planilha aberta no Google Sheets, clique em Extensões → Apps Script',
+        'Apague todo o código padrão (function myFunction...)',
+        'Cole o conteúdo completo do arquivo Codigo.gs (fornecido)',
+        'Salve com Ctrl+S e dê o nome "JA Agro Backend"',
+        'Clique em Implantar → Nova implantação',
+        'Tipo: App da Web | Executar como: Você | Acesso: Qualquer pessoa',
+        'Autorize as permissões solicitadas pelo Google',
+        'COPIE a URL gerada — você vai precisar dela no próximo passo',
+      ]
+    },
+    {
+      n:3, title:'Cadastrar o produtor neste painel',
+      color:'#f5a623',
+      items:[
+        'Vá em Produtores → Novo Produtor',
+        'Preencha nome, propriedade e cole a URL do Apps Script no campo Planilha',
+        'O sistema gera automaticamente um código único de 6 dígitos',
+        'Anote ou copie o código e o link de acesso gerado',
+      ]
+    },
+    {
+      n:4, title:'Hospedar o app mobile no GitHub Pages',
+      color:'#a3e635',
+      items:[
+        'Acesse github.com e crie um novo repositório público: "ja-campo"',
+        'Faça upload dos 3 arquivos: index.html, sw.js, manifest.json',
+        'No arquivo index.html, substitua FIREBASE_CONFIG pelos dados do seu projeto Firebase',
+        'Vá em Settings → Pages → Branch: main → Save',
+        'Seu app estará disponível em: https://SEU-USUARIO.github.io/ja-campo/',
+        'Atualize a constante APP_URL neste painel admin com essa URL',
+      ]
+    },
+    {
+      n:5, title:'Enviar acesso ao produtor',
+      color:'#5dba47',
+      items:[
+        'No painel → Produtores → botão "Código" do produtor',
+        'Copie o link direto e envie pelo WhatsApp ou e-mail',
+        'O produtor abre o link no celular e o código é preenchido automaticamente',
+        'Instruções para instalar como app: Menu Chrome → "Adicionar à tela inicial"',
+        'iOS (Safari): Compartilhar → "Adicionar à Tela de Início"',
+      ]
+    }
+  ];
+
+  document.getElementById('deploySteps').innerHTML = steps.map(s=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:14px;border-left:3px solid ${s.color}">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div style="width:28px;height:28px;border-radius:50%;background:${s.color};color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">${s.n}</div>
+        <div style="font-size:15px;font-weight:700">${s.title}</div>
+      </div>
+      <ol style="padding-left:20px;display:flex;flex-direction:column;gap:7px">
+        ${s.items.map(i=>`<li style="font-size:13px;color:var(--muted);line-height:1.5">${i}</li>`).join('')}
+      </ol>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════
+// TOAST
+// ══════════════════════
+let atToastTimer;
+function atToast(msg, type='') {
+  const el = document.getElementById('adminToast');
+  el.textContent=msg;
+  el.className='show '+type;
+  clearTimeout(atToastTimer);
+  atToastTimer = setTimeout(()=>{ el.className=''; },3000);
+}
+</script>
+</body>
+</html>
