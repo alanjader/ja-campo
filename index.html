@@ -509,15 +509,24 @@ function onSafra(){}
 function onTalhao(){
   var talhao=document.getElementById('fTalhao').value;
   var L=getListas();
-  var info=(L.talhaoInfo||{})[talhao];
   var box=document.getElementById('talhaoInfo');
-  if(info&&talhao){
-    document.getElementById('aiCult').textContent=info.cultura||'-';
-    document.getElementById('aiArea').textContent=info.area?info.area+' ha':'-';
-    document.getElementById('aiVar').textContent=info.variedade||'-';
+  // Tenta talhaoInfo detalhado primeiro, depois areaTalhao simples
+  var info=(L.talhaoInfo||{})[talhao];
+  var areaSimples=(L.areaTalhao||{})[talhao];
+  var area=info?info.area:areaSimples;
+  if(talhao&&area){
+    document.getElementById('aiCult').textContent=(info&&info.cultura)||'-';
+    document.getElementById('aiArea').textContent=area+' ha';
+    document.getElementById('aiVar').textContent=(info&&info.variedade)||'-';
     box.classList.add('show');
     var fArea=document.getElementById('fArea');
-    if(!fArea.value&&info.area)fArea.value=info.area;
+    if(!fArea.value)fArea.value=area;
+  }else if(talhao){
+    // Talhao selecionado mas sem area cadastrada — mostra box sem area
+    document.getElementById('aiCult').textContent=(info&&info.cultura)||'-';
+    document.getElementById('aiArea').textContent='Nao cadastrada';
+    document.getElementById('aiVar').textContent=(info&&info.variedade)||'-';
+    box.classList.add('show');
   }else{
     box.classList.remove('show');
   }
@@ -527,7 +536,10 @@ function onTalhao(){
 function onAtiv(){
   var atv=document.getElementById('fAtiv').value;
   var L=getListas();
-  var itens=(L.atividadeItens||{})[atv]||L.itens||[];
+  // Se tem mapa de dependencia usa ele, senao mostra todos os itens
+  var mapa=L.atividadeItens||{};
+  var temMapa=Object.keys(mapa).length>0;
+  var itens=temMapa?(mapa[atv]||L.itens||[]):(L.itens||[]);
   var fItem=document.getElementById('fItem');
   var fProd=document.getElementById('fProd');
   fItem.disabled=!atv;
@@ -537,13 +549,17 @@ function onAtiv(){
   for(var i=0;i<itens.length;i++){var o=document.createElement('option');o.value=o.textContent=itens[i];fItem.appendChild(o);}
   while(fProd.options.length>1)fProd.remove(1);
   fProd.options[0].textContent='Selecione o item primeiro';
+  fProd.disabled=true;
   document.getElementById('doseAlert').className='dose';
 }
 
 function onItem(){
   var item=document.getElementById('fItem').value;
   var L=getListas();
-  var prods=(L.itemProdutos||{})[item]||[];
+  // Se tem mapa de dependencia usa ele, senao mostra todos os produtos
+  var mapa=L.itemProdutos||{};
+  var temMapa=Object.keys(mapa).length>0;
+  var prods=temMapa?(mapa[item]||L.produtos||[]):(L.produtos||[]);
   var fProd=document.getElementById('fProd');
   fProd.disabled=!item;
   while(fProd.options.length>1)fProd.remove(1);
