@@ -244,7 +244,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   </div>
 </div>
 <script>
-// Roda imediatamente após o HTML do login estar no DOM
+// Roda imediatamente aps o HTML do login estar no DOM
 (function tryInitDigs(){
   var ins = document.querySelectorAll('#digs input');
   if(!ins.length){ setTimeout(tryInitDigs, 50); return; }
@@ -548,19 +548,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 <script>window.JA_CONFIG = window.JA_CONFIG || { firebase: { apiKey: '' }, appUrl: '' };</script>
 <script src="config.js" onerror="console.warn('config.js nao encontrado')"></script>
 <script>
-// ─── FIREBASE ───
+// --- FIREBASE ---
 let db;
 try{
   const cfg = window.JA_CONFIG?.firebase;
   if(!cfg || cfg.apiKey==='COLE_SUA_API_KEY_AQUI'){
-    console.warn('config.js não configurado ainda');
+    console.warn('config.js n\u00E3o configurado ainda');
   } else {
     firebase.initializeApp(cfg);
     db=firebase.firestore();
   }
 }catch(e){ console.warn('Firebase erro:', e.message); }
 
-// ─── STORAGE ───
+// --- STORAGE ---
 const K={sess:'ja_sess',movs:'ja_movs',lst:'ja_listas',prf:'ja_prefs'};
 const jg=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}};
 const js=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
@@ -572,27 +572,27 @@ const getListas=()=>jg(K.lst)||DFLT;
 const getPrefs=()=>jg(K.prf)||{};
 const savePrefs=()=>js(K.prf,{auto:document.getElementById('cfgAuto')?.checked});
 
-// ─── LISTAS DEFAULT ───
+// --- LISTAS DEFAULT ---
 const DFLT={
   safras:['2025-2026'],
   talhoes:['CAF-01','CAF-02'],
-  atividades:['ADUBAÇÃO','PULVERIZAÇÃO','PLANTIO','COLHEITA','ROÇADA','PODA','CUSTO DIVERSO'],
-  itens:['NPK CAFÉ 20-05-20','CLORETO DE POTÁSSIO CAFÉ','HERBICIDA CAFÉ','FUNGICIDA CAFÉ'],
+  atividades:['ADUBA\u00C7\u00C3O','PULVERIZA\u00C7\u00C3O','PLANTIO','COLHEITA','RO\u00C7ADA','PODA','CUSTO DIVERSO'],
+  itens:['NPK CAF\u00C9 20-05-20','CLORETO DE POT\u00C1SSIO CAF\u00C9','HERBICIDA CAF\u00C9','FUNGICIDA CAF\u00C9'],
   produtos:['YaraBela Nitromag 20-05-20','Fertipar NPK 20-05-20','KCl Mosaic','Roundup Original Mais'],
   responsaveis:['Equipe A','Equipe B'],
   maquinas:['TRATOR','PULVERIZADOR','COLHEDORA'],
   fornecedores:['Cooperativa','Revenda','Yara Brasil'],
-  formaspgto:['À VISTA','PIX','BOLETO','30/60/90'],
-  // mapas de dependência
+  formaspgto:['\u00C0 VISTA','PIX','BOLETO','30/60/90'],
+  // mapas de dependncia
   areaTalhao:{'CAF-01':12.5,'CAF-02':8.3},
-  talhaoInfo:{'CAF-01':{cultura:'CAFÉ',area:12.5,variedade:'Catuaí'},'CAF-02':{cultura:'CAFÉ',area:8.3,variedade:'Bourbon'}},
-  atividadeItens:{'ADUBAÇÃO':['NPK CAFÉ 20-05-20','CLORETO DE POTÁSSIO CAFÉ'],'PULVERIZAÇÃO':['HERBICIDA CAFÉ','FUNGICIDA CAFÉ']},
-  itemProdutos:{'NPK CAFÉ 20-05-20':['YaraBela Nitromag 20-05-20','Fertipar NPK 20-05-20'],'CLORETO DE POTÁSSIO CAFÉ':['KCl Mosaic'],'HERBICIDA CAFÉ':['Roundup Original Mais'],'FUNGICIDA CAFÉ':['Amistar Top']},
-  itemDoses:{'NPK CAFÉ 20-05-20':{min:200,max:300,ref:250,unit:'KG/HA'},'CLORETO DE POTÁSSIO CAFÉ':{min:100,max:200,ref:150,unit:'KG/HA'},'HERBICIDA CAFÉ':{min:2,max:4,ref:3,unit:'L/HA'},'FUNGICIDA CAFÉ':{min:0.5,max:1.5,ref:1,unit:'L/HA'}},
-  itemCusto:{'NPK CAFÉ 20-05-20':3.80,'CLORETO DE POTÁSSIO CAFÉ':2.50,'HERBICIDA CAFÉ':28.0,'FUNGICIDA CAFÉ':95.0},
+  talhaoInfo:{'CAF-01':{cultura:'CAF\u00C9',area:12.5,variedade:'Catua\u00ED'},'CAF-02':{cultura:'CAF\u00C9',area:8.3,variedade:'Bourbon'}},
+  atividadeItens:{'ADUBA\u00C7\u00C3O':['NPK CAF\u00C9 20-05-20','CLORETO DE POT\u00C1SSIO CAF\u00C9'],'PULVERIZA\u00C7\u00C3O':['HERBICIDA CAF\u00C9','FUNGICIDA CAF\u00C9']},
+  itemProdutos:{'NPK CAF\u00C9 20-05-20':['YaraBela Nitromag 20-05-20','Fertipar NPK 20-05-20'],'CLORETO DE POT\u00C1SSIO CAF\u00C9':['KCl Mosaic'],'HERBICIDA CAF\u00C9':['Roundup Original Mais'],'FUNGICIDA CAF\u00C9':['Amistar Top']},
+  itemDoses:{'NPK CAF\u00C9 20-05-20':{min:200,max:300,ref:250,unit:'KG/HA'},'CLORETO DE POT\u00C1SSIO CAF\u00C9':{min:100,max:200,ref:150,unit:'KG/HA'},'HERBICIDA CAF\u00C9':{min:2,max:4,ref:3,unit:'L/HA'},'FUNGICIDA CAF\u00C9':{min:0.5,max:1.5,ref:1,unit:'L/HA'}},
+  itemCusto:{'NPK CAF\u00C9 20-05-20':3.80,'CLORETO DE POT\u00C1SSIO CAF\u00C9':2.50,'HERBICIDA CAF\u00C9':28.0,'FUNGICIDA CAF\u00C9':95.0},
 };
 
-// ─── LOGIN DÍGITOS ───
+// --- LOGIN DGITOS ---
 function initDigs(){
   const ins=[...document.querySelectorAll('#digs input')];
   if(!ins.length)return;
@@ -634,35 +634,35 @@ async function doLogin(){
   btn.disabled=true;btn.innerHTML='<div class="spin"></div>';
   document.getElementById('lerr').textContent='';
 
-  /* verifica se Firebase está configurado */
+  /* verifica se Firebase est configurado */
   const _cfg=window.JA_CONFIG?.firebase;
   if(!db||!_cfg||_cfg.apiKey==='COLE_SUA_API_KEY_AQUI'){
-    document.getElementById('lerr').textContent='⚠ Firebase não configurado ainda. Configure o arquivo e faça o upload novamente.';
+    document.getElementById('lerr').textContent='\u26A0 Firebase n\u00E3o configurado ainda. Configure o arquivo e fa\u00E7a o upload novamente.';
     btn.disabled=false;btn.innerHTML='<span>Entrar</span>';
     return;
   }
 
   try{
     const snap=await db.collection('produtores').where('codigo','==',code).where('ativo','==',true).limit(1).get();
-    if(snap.empty)throw new Error('Código inválido ou inativo. Verifique com seu consultor.');
+    if(snap.empty)throw new Error('C\u00F3digo inv\u00E1lido ou inativo. Verifique com seu consultor.');
     const d=snap.docs[0].data();
     const sess={uid:snap.docs[0].id,code,produtor:d.produtor,propriedade:d.propriedade,backendUrl:d.backendUrl};
     js(K.sess,sess);
     if(d.listas)js(K.lst,d.listas);
     initApp(sess);
   }catch(e){
-    /* tenta sessão salva offline */
+    /* tenta sesso salva offline */
     const sv=getSess();
     if(sv&&sv.code===code){initApp(sv);return;}
 
-    /* mensagens de erro amigáveis */
+    /* mensagens de erro amigveis */
     let msg=e.message||'Erro desconhecido';
     if(msg.includes('network')||msg.includes('fetch')||msg.includes('offline')){
-      msg='Sem conexão com a internet. Tente novamente quando tiver sinal.';
+      msg='Sem conex\u00E3o com a internet. Tente novamente quando tiver sinal.';
     } else if(msg.includes('permission')||msg.includes('PERMISSION')){
-      msg='Erro de permissão no Firebase. Verifique as regras do Firestore.';
+      msg='Erro de permiss\u00E3o no Firebase. Verifique as regras do Firestore.';
     } else if(msg.includes('api-key')||msg.includes('API_KEY')||msg.includes('invalid-api-key')){
-      msg='API Key do Firebase inválida. Verifique o arquivo index.html.';
+      msg='API Key do Firebase inv\u00E1lida. Verifique o arquivo index.html.';
     }
     document.getElementById('lerr').textContent=msg;
     btn.disabled=false;btn.innerHTML='<span>Entrar</span>';
@@ -675,7 +675,7 @@ function initApp(sess){
   document.getElementById('farmLbl').textContent=sess.propriedade||sess.produtor;
   document.getElementById('cfgProd').textContent=sess.produtor;
   document.getElementById('cfgProp').textContent=sess.propriedade;
-  document.getElementById('cfgCode').textContent='••••'+sess.code.slice(-2);
+  document.getElementById('cfgCode').textContent='\u2022\u2022\u2022\u2022'+sess.code.slice(-2);
   document.getElementById('cfgAuto').checked=!!getPrefs().auto;
   document.getElementById('tabBar').style.display='flex';
   document.getElementById('fData').value=hoje();
@@ -683,14 +683,14 @@ function initApp(sess){
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
-  /* inicializa campos de dígito */
+  /* inicializa campos de dgito */
   initDigs();
 
-  /* auto-login se já tem sessão salva */
+  /* auto-login se j tem sesso salva */
   const s=getSess();
   if(s){initApp(s);return;}
 
-  /* preenche via link mágico ?code=XXXXXX */
+  /* preenche via link mgico ?code=XXXXXX */
   const c=new URLSearchParams(location.search).get('code');
   if(c&&c.length===6){
     const ins=[...document.querySelectorAll('#digs input')];
@@ -711,7 +711,7 @@ function sair(){
   document.getElementById('btnLogin').disabled=true;
 }
 
-// ─── POPULAR SELECTS ───
+// --- POPULAR SELECTS ---
 function fill(id,arr,ph){
   const el=document.getElementById(id);if(!el)return;
   const cur=el.value;
@@ -733,7 +733,7 @@ function populateAll(){
   document.getElementById('fProd').disabled=true;
 }
 
-// ─── DEPENDÊNCIAS ───
+// --- DEPENDNCIAS ---
 function onSafra(){}
 
 function onTalhao(){
@@ -742,11 +742,11 @@ function onTalhao(){
   const info=(L.talhaoInfo||{})[talhao];
   const box=document.getElementById('talhaoInfo');
   if(info&&talhao){
-    document.getElementById('aiCult').textContent=info.cultura||'—';
-    document.getElementById('aiArea').textContent=info.area?info.area+' ha':'—';
-    document.getElementById('aiVar').textContent=info.variedade||'—';
+    document.getElementById('aiCult').textContent=info.cultura||'\u2014';
+    document.getElementById('aiArea').textContent=info.area?info.area+' ha':'\u2014';
+    document.getElementById('aiVar').textContent=info.variedade||'\u2014';
     box.classList.add('show');
-    // auto-preenche área se campo vazio
+    // auto-preenche rea se campo vazio
     const fArea=document.getElementById('fArea');
     if(!fArea.value&&info.area) fArea.value=info.area;
   } else {
@@ -780,11 +780,11 @@ function onItem(){
   fProd.options.length=1;
   fProd.options[0].textContent=item?'Selecione o produto':'Selecione o item primeiro';
   prods.forEach(v=>{const o=document.createElement('option');o.value=o.textContent=v;fProd.appendChild(o);});
-  // custo referência
+  // custo referncia
   const custoRef=document.getElementById('custoRef');
   const ref=(L.itemCusto||{})[item];
   if(ref){
-    custoRef.textContent='💡 Custo de referência: R$ '+ref.toFixed(2).replace('.',',');
+    custoRef.textContent='\u1F4A1 Custo de refer\u00EAncia: R$ '+ref.toFixed(2).replace('.',',');
     custoRef.className='custo-ref show';
     const fCusto=document.getElementById('fCusto');
     if(!fCusto.value)fCusto.value=ref;
@@ -805,10 +805,10 @@ function checkDose(qha){
   if(!d||!qha){el.className='dose';return;}
   if(qha<d.min||qha>d.max){
     el.className='dose warn';
-    el.textContent='⚠ Fora do recomendado: '+d.min+'–'+d.max+' '+d.unit;
+    el.textContent='\u26A0 Fora do recomendado: '+d.min+'\u2013'+d.max+' '+d.unit;
   } else {
     el.className='dose ok';
-    el.textContent='✅ Dose correta (ref: '+d.ref+' '+d.unit+')';
+    el.textContent='\u2705 Dose correta (ref: '+d.ref+' '+d.unit+')';
   }
 }
 
@@ -828,14 +828,14 @@ function calcTudo(){
   const ctot=qtot*custo;
   document.getElementById('qTotal').textContent=area
     ?(qtot.toLocaleString('pt-BR',{maximumFractionDigits:2})+' un/kg/L ('+area+' ha)')
-    :'— informe área ou selecione talhão';
+    :'\u2014 informe \u00E1rea ou selecione talh\u00E3o';
   document.getElementById('cTotal').textContent=ctot
     ?'R$ '+ctot.toLocaleString('pt-BR',{minimumFractionDigits:2})
-    :'—';
+    :'\u2014';
   checkDose(qha);
 }
 
-// ─── SALVAR ───
+// --- SALVAR ---
 function salvar(){
   const data=document.getElementById('fData').value;
   const safra=document.getElementById('fSafra').value;
@@ -849,7 +849,7 @@ function salvar(){
   if(!atv)erros.push('fAtiv');
   if(!qha)erros.push('fQha');
   document.querySelectorAll('.err').forEach(e=>e.classList.remove('err'));
-  if(erros.length){erros.forEach(id=>document.getElementById(id)?.classList.add('err'));toast('Preencha os campos obrigatórios (*)','bad');return;}
+  if(erros.length){erros.forEach(id=>document.getElementById(id)?.classList.add('err'));toast('Preencha os campos obrigat\u00F3rios (*)','bad');return;}
   const area=getAreaAtual();
   const cu=parseFloat(document.getElementById('fCusto').value)||0;
   const q=parseFloat(qha);
@@ -874,7 +874,7 @@ function salvar(){
     _status:'pending',_ts:new Date().toISOString(),
   };
   const lista=getMovs();lista.unshift(reg);saveMovs(lista);
-  toast('✅ Lançamento salvo!','ok');
+  toast('\u2705 Lan\u00E7amento salvo!','ok');
   limpar();updateStats();
 }
 
@@ -882,8 +882,8 @@ function limpar(){
   ['fData','fItem','fProd','fAplic','fQha','fArea','fResp','fMaq','fForn','fPgto','fCompet','fVenc','fCusto','fDoc','fObs']
     .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['fSafra','fTalhao','fAtiv'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('qTotal').textContent='—';
-  document.getElementById('cTotal').textContent='—';
+  document.getElementById('qTotal').textContent='\u2014';
+  document.getElementById('cTotal').textContent='\u2014';
   document.getElementById('doseAlert').className='dose';
   document.getElementById('talhaoInfo').classList.remove('show');
   document.getElementById('custoRef').className='custo-ref';
@@ -893,7 +893,7 @@ function limpar(){
   document.getElementById('fData').value=hoje();
 }
 
-// ─── LISTA ───
+// --- LISTA ---
 function renderLista(){
   const lista=getMovs();
   const el=document.getElementById('listaEl');
@@ -901,43 +901,27 @@ function renderLista(){
   const pend=lista.filter(r=>r._status==='pending').length;
   badge.textContent=pend?'('+pend+')':'';
   if(!lista.length){
-    el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--dim);font-size:15px"><div style="font-size:48px;margin-bottom:12px;opacity:.3">📭</div>Nenhum lançamento salvo ainda</div>';
+    el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--dim);font-size:15px"><div style="font-size:48px;margin-bottom:12px;opacity:.3">\u1F4ED</div>Nenhum lan\u00E7amento salvo ainda</div>';
     return;
   }
-  el.innerHTML=lista.map(r=>`
-    <div class="rcard ${r._status==='synced'?'sync':r._status==='error'?'err':'pend'}">
-      <div class="rt">
-        <div class="rt-t">${r.ATIVIDADE||'—'} · ${r.TALHAO||'—'}</div>
-        <div class="rt-d">${r.DATA}</div>
-      </div>
-      <div class="chips">
-        <span class="chip">${r.SAFRA}</span>
-        ${r.ITEM?`<span class="chip">${r.ITEM}</span>`:''}
-        ${r.QTDE_HA?`<span class="chip g">${r.QTDE_HA}/ha</span>`:''}
-        ${r.CUSTO_TOTAL?`<span class="chip">R$ ${r.CUSTO_TOTAL.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>`:''}
-        <span class="chip ${r._status==='synced'?'g':r._status==='error'?'r':'y'}">${r._status==='synced'?'✓ Enviado':r._status==='error'?'✗ Erro':'⏳ Pendente'}</span>
-      </div>
-      ${r._errMsg?`<div style="font-size:12px;color:var(--danger);margin-bottom:8px;padding:8px 10px;background:rgba(244,67,54,.08);border-radius:8px;font-family:var(--mono)">${r._errMsg}</div>`:''}
-      <button class="del-btn" onclick="deletar('${r.id}')">🗑 Remover</button>
-    </div>
-  `).join('');
+  el.innerHTML=lista.map(r=>`\n    <div class="rcard ${r._status==='synced'?'sync':r._status==='error'?'err':'pend'}">\n      <div class="rt">\n        <div class="rt-t">${r.ATIVIDADE||'\u2014'} \u00B7 ${r.TALHAO||'\u2014'}</div>\n        <div class="rt-d">${r.DATA}</div>\n      </div>\n      <div class="chips">\n        <span class="chip">${r.SAFRA}</span>\n        ${r.ITEM?`<span class="chip">${r.ITEM}</span>`:''}\n        ${r.QTDE_HA?`<span class="chip g">${r.QTDE_HA}/ha</span>`:''}\n        ${r.CUSTO_TOTAL?`<span class="chip">R$ ${r.CUSTO_TOTAL.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>`:''}\n        <span class="chip ${r._status==='synced'?'g':r._status==='error'?'r':'y'}">${r._status==='synced'?'\u2713 Enviado':r._status==='error'?'\u2717 Erro':'\u23F3 Pendente'}</span>\n      </div>\n      ${r._errMsg?`<div style="font-size:12px;color:var(--danger);margin-bottom:8px;padding:8px 10px;background:rgba(244,67,54,.08);border-radius:8px;font-family:var(--mono)">${r._errMsg}</div>`:''}\n      <button class="del-btn" onclick="deletar('${r.id}')">\u1F5D1 Remover</button>\n    </div>\n  `).join('');
 }
 
 function deletar(id){
-  if(!confirm('Remover este lançamento?'))return;
+  if(!confirm('Remover este lan\u00E7amento?'))return;
   saveMovs(getMovs().filter(r=>r.id!==id));
   renderLista();updateStats();toast('Removido');
 }
 
-// ─── SYNC ───
+// --- SYNC ---
 async function sincronizar(){
   const s=getSess();
-  if(!s?.backendUrl){toast('URL do backend não configurada — veja Configurações','bad');return;}
+  if(!s?.backendUrl){toast('URL do backend n\u00E3o configurada \u2014 veja Configura\u00E7\u00F5es','bad');return;}
   const btn=document.getElementById('btnSync');
   btn.disabled=true;btn.innerHTML='<div class="spin"></div> Enviando...';
   const lista=getMovs();
   const pend=lista.filter(r=>r._status==='pending');
-  if(!pend.length){toast('Nenhum lançamento pendente','ok');btn.disabled=false;btn.innerHTML='⟳ Sincronizar Agora';return;}
+  if(!pend.length){toast('Nenhum lan\u00E7amento pendente','ok');btn.disabled=false;btn.innerHTML='\u27F3 Sincronizar Agora';return;}
 
   let ok=0,erros=[];
   for(const reg of pend){
@@ -949,7 +933,7 @@ async function sincronizar(){
       });
       const txt=await res.text();
       let json;
-      try{json=JSON.parse(txt)}catch(e){throw new Error('Resposta inválida do servidor: '+txt.substring(0,200));}
+      try{json=JSON.parse(txt)}catch(e){throw new Error('Resposta inv\u00E1lida do servidor: '+txt.substring(0,200));}
       if(!res.ok||json.ok===false){
         throw new Error('Servidor retornou erro: '+(json.error||json.message||'status '+res.status));
       }
@@ -961,7 +945,7 @@ async function sincronizar(){
     }
   }
   saveMovs(lista);updateStats();renderLista();
-  btn.disabled=false;btn.innerHTML='⟳ Sincronizar Agora';
+  btn.disabled=false;btn.innerHTML='\u27F3 Sincronizar Agora';
 
   // mostra log de erros detalhado
   const logEl=document.getElementById('errLog');
@@ -969,15 +953,12 @@ async function sincronizar(){
   if(erros.length){
     logEl.classList.add('show');
     logTxt.textContent=erros.map((e,i)=>
-      `[${i+1}] ${e.talhao} — ${e.atividade}
-    Erro: ${e.erro}
-`
-    ).join('
-');
-    toast(ok+' enviados · '+erros.length+' com erro — veja detalhes','bad');
+      '['+( i+1)+'] '+e.talhao+' \u2014 '+e.atividade+'\n    Erro: '+e.erro
+    ).join('\n\n');
+    toast(ok+' enviados \u00B7 '+erros.length+' com erro \u2014 veja detalhes','bad');
   } else {
     logEl.classList.remove('show');
-    toast('✅ '+ok+' lançamento(s) enviado(s) com sucesso!','ok');
+    toast('\u2705 '+ok+' lan\u00E7amento(s) enviado(s) com sucesso!','ok');
   }
 }
 
@@ -988,33 +969,33 @@ async function retrySyncErros(){
   await sincronizar();
 }
 
-// ─── EXPORT ───
+// --- EXPORT ---
 function exportCSV(){
   const lista=getMovs();
-  if(!lista.length){toast('Nenhum lançamento','bad');return;}
+  if(!lista.length){toast('Nenhum lan\u00E7amento','bad');return;}
   const hdr=['DATA','SAFRA','TALHAO','ATIVIDADE','ITEM','PRODUTO','APLICACAO','QTDE_HA','QTDE_TOTAL','RESPONSAVEL','MAQUINA','FORNECEDOR','DOCUMENTO','OBS','FORMA_PAGAMENTO','COMPETENCIA','VENCIMENTO','CUSTO_UNIT','CUSTO_TOTAL'];
   const rows=lista.map(r=>hdr.map(h=>`"${(r[h]||'').toString().replace(/"/g,'""')}"`).join(','));
   dl('lancamentos_'+hoje()+'.csv',[hdr.join(','),...rows].join('
 '),'text/csv');
-  toast('CSV baixado ✓','ok');
+  toast('CSV baixado \u2713','ok');
 }
-function exportJSON(){dl('backup_'+Date.now()+'.json',JSON.stringify(getMovs(),null,2),'application/json');toast('Backup baixado ✓','ok');}
+function exportJSON(){dl('backup_'+Date.now()+'.json',JSON.stringify(getMovs(),null,2),'application/json');toast('Backup baixado \u2713','ok');}
 function dl(n,c,t){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:t}));a.download=n;a.click();}
 
-// ─── RELOAD LISTAS ───
+// --- RELOAD LISTAS ---
 async function reloadListas(){
   const s=getSess();
-  if(!s?.backendUrl){toast('URL não configurada','bad');return;}
+  if(!s?.backendUrl){toast('URL n\u00E3o configurada','bad');return;}
   toast('Atualizando listas...','info');
   try{
     const r=await fetch(s.backendUrl+'?action=getListas');
     const d=await r.json();
     js(K.lst,d);populateAll();
-    toast('✅ Listas atualizadas!','ok');
-  }catch(e){toast('Sem conexão — usando listas salvas','bad');}
+    toast('\u2705 Listas atualizadas!','ok');
+  }catch(e){toast('Sem conex\u00E3o \u2014 usando listas salvas','bad');}
 }
 
-// ─── NAVEGAÇÃO ───
+// --- NAVEGAO ---
 function showPg(n){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
@@ -1031,7 +1012,7 @@ function setTab(t){
   if(t==='lista')renderLista();
 }
 
-// ─── STATS / PIP ───
+// --- STATS / PIP ---
 function updateStats(){
   const lista=getMovs();
   const p=lista.filter(r=>r._status==='pending').length;
@@ -1048,7 +1029,7 @@ function updatePip(){
   document.getElementById('nb-sync').classList.toggle('haspip',n>0);
 }
 
-// ─── CONECTIVIDADE ───
+// --- CONECTIVIDADE ---
 function updateConn(){
   const on=navigator.onLine;
   const p=document.getElementById('connPill');
@@ -1060,7 +1041,7 @@ function updateConn(){
 window.addEventListener('online',updateConn);
 window.addEventListener('offline',updateConn);
 
-// ─── TOAST ───
+// --- TOAST ---
 let _tt;
 function toast(msg,type=''){
   const el=document.getElementById('toast');
@@ -1068,10 +1049,10 @@ function toast(msg,type=''){
   clearTimeout(_tt);_tt=setTimeout(()=>{el.className='';},3000);
 }
 
-// ─── UTILS ───
+// --- UTILS ---
 function hoje(){return new Date().toISOString().split('T')[0];}
 
-// ─── SERVICE WORKER ───
+// --- SERVICE WORKER ---
 if('serviceWorker'in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
