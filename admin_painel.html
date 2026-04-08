@@ -8,6 +8,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Configurações — edite apenas config.js -->
+  <script src="config.js"></script>
   <style>
     :root{
       --bg:#0a0a0a;--surface:#111;--card:#161616;--border:#252525;
@@ -381,22 +383,22 @@
 
 <!-- ══════════════════════ CONFIG FIREBASE ══════════════════════ -->
 <script>
-const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyA1wZeESWWjZ3uQlJq4IqVl0RtZbJBDoqk",
-  authDomain:        "ja-agro.firebaseapp.com",
-  projectId:         "ja-agro",
-  storageBucket:     "ja-agro.firebasestorage.app",
-  messagingSenderId: "631857913629",
-  appId:             "1:631857913629:web:1e6c7a1ce32a14975a0bf4"
-};
-// URL do app mobile (para gerar links de acesso)
-const APP_URL = "https://alanjader.github.io/ja-campo/";
+// Lê do config.js — não edite aqui
+const FIREBASE_CONFIG = window.JA_CONFIG?.firebase || {};
+const APP_URL = window.JA_CONFIG?.appUrl || "";
 </script>
 
 <script>
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
 const db   = firebase.firestore();
+
+// Avisa se config.js não foi configurado
+if(!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === 'COLE_SUA_API_KEY_AQUI'){
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('adminErr').textContent = '⚠ config.js não configurado. Preencha os dados do Firebase.';
+  });
+}
 
 // ══════════════════════
 // AUTH ADMIN

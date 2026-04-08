@@ -505,20 +505,23 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 
 <div id="toast"></div>
 
-<script>
-const FIREBASE_CONFIG = {
-  apiKey:"AIzaSyA1wZeESWWjZ3uQlJq4IqVl0RtZbJBDoqk",
-  authDomain:"ja-agro.firebaseapp.com",
-  projectId:"ja-agro",
-  storageBucket:"ja-agro.firebasestorage.app",
-  messagingSenderId:"631857913629",
-  appId:"1:631857913629:web:1e6c7a1ce32a14975a0bf4"
-};
-</script>
+<!-- ═══════════════════════════════════════════════════
+     CONFIGURAÇÕES — edite apenas o arquivo config.js
+     Não é necessário mexer neste arquivo index.html
+═══════════════════════════════════════════════════ -->
+<script src="config.js"></script>
 <script>
 // ─── FIREBASE ───
 let db;
-try{ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.firestore(); }catch(e){}
+try{
+  const cfg = window.JA_CONFIG?.firebase;
+  if(!cfg || cfg.apiKey==='COLE_SUA_API_KEY_AQUI'){
+    console.warn('config.js não configurado ainda');
+  } else {
+    firebase.initializeApp(cfg);
+    db=firebase.firestore();
+  }
+}catch(e){ console.warn('Firebase erro:', e.message); }
 
 // ─── STORAGE ───
 const K={sess:'ja_sess',movs:'ja_movs',lst:'ja_listas',prf:'ja_prefs'};
@@ -583,6 +586,15 @@ async function doLogin(){
   const btn=document.getElementById('btnLogin');
   btn.disabled=true;btn.innerHTML='<div class="spin"></div>';
   document.getElementById('lerr').textContent='';
+
+  /* verifica se Firebase está configurado */
+  const _cfg=window.JA_CONFIG?.firebase;
+  if(!db||!_cfg||_cfg.apiKey==='COLE_SUA_API_KEY_AQUI'){
+    document.getElementById('lerr').textContent='⚠ Firebase não configurado ainda. Configure o arquivo e faça o upload novamente.';
+    btn.disabled=false;btn.innerHTML='<span>Entrar</span>';
+    return;
+  }
+
   try{
     const snap=await db.collection('produtores').where('codigo','==',code).where('ativo','==',true).limit(1).get();
     if(snap.empty)throw new Error('Código inválido ou inativo. Verifique com seu consultor.');
@@ -592,9 +604,20 @@ async function doLogin(){
     if(d.listas)js(K.lst,d.listas);
     initApp(sess);
   }catch(e){
+    /* tenta sessão salva offline */
     const sv=getSess();
     if(sv&&sv.code===code){initApp(sv);return;}
-    document.getElementById('lerr').textContent=e.message||'Sem conexão. Tente novamente.';
+
+    /* mensagens de erro amigáveis */
+    let msg=e.message||'Erro desconhecido';
+    if(msg.includes('network')||msg.includes('fetch')||msg.includes('offline')){
+      msg='Sem conexão com a internet. Tente novamente quando tiver sinal.';
+    } else if(msg.includes('permission')||msg.includes('PERMISSION')){
+      msg='Erro de permissão no Firebase. Verifique as regras do Firestore.';
+    } else if(msg.includes('api-key')||msg.includes('API_KEY')||msg.includes('invalid-api-key')){
+      msg='API Key do Firebase inválida. Verifique o arquivo index.html.';
+    }
+    document.getElementById('lerr').textContent=msg;
     btn.disabled=false;btn.innerHTML='<span>Entrar</span>';
   }
 }
@@ -619,8 +642,19 @@ window.addEventListener('DOMContentLoaded',()=>{
     const ins=document.querySelectorAll('#digs input');
     c.split('').forEach((ch,i)=>{if(ins[i]){ins[i].value=ch;ins[i].classList.add('ok');}});
     document.getElementById('btnLogin').disabled=false;
-    setTimeout(doLogin,400);
+    setTimeout(doLogin,600);
   }
+});
+
+/* garante que o botão habilita sempre que 6 dígitos estão presentes */
+document.addEventListener('DOMContentLoaded',()=>{
+  function checkBtn(){
+    document.getElementById('btnLogin').disabled=getCode().length<6;
+  }
+  document.querySelectorAll('#digs input').forEach(inp=>{
+    inp.addEventListener('input',checkBtn);
+    inp.addEventListener('keyup',checkBtn);
+  });
 });
 
 function sair(){
